@@ -22,6 +22,11 @@ repositories {
 }
 
 dependencies {
+    // add tree sitter
+    implementation 'io.github.bonede:tree-sitter:0.20.8'
+    // add python parser
+    implementation 'io.github.bonede:tree-sitter-python:0.20.4'
+    implementation 'ru.odnoklassniki:one-nio:1.7.1'
 //  spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
