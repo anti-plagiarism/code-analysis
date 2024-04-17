@@ -1,8 +1,6 @@
 package com.vk.codeanalysis.tokenizer;
 
-import org.treesitter.TSLanguage;
-import org.treesitter.TSParser;
-import org.treesitter.TreeSitterPython;
+import org.treesitter.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,7 +16,7 @@ import java.util.List;
 
 public class PlagiarismDetector {
     final Fingerprinter fingerprinter;
-    final Map<Integer, List<File>> fingerprintBase = new HashMap<>();
+    final Map<Integer, Set<File>> fingerprintBase = new HashMap<>();
 
     public PlagiarismDetector(TSLanguage language) {
         TSParser tsParser = new TSParser();
@@ -32,11 +30,11 @@ public class PlagiarismDetector {
         while (fingerprints.hasNext()) {
             int fingerprint = fingerprints.next();
             collisionReport.addFingerprint();
-            List<File> files;
+            Set<File> files;
             if (fingerprintBase.containsKey(fingerprint)) {
                 files = fingerprintBase.get(fingerprint);
             } else {
-                files = new LinkedList<>();
+                files = new HashSet<>();
             }
             for (File collisionFile : files) {
                 if (!file.equals(collisionFile)) {
