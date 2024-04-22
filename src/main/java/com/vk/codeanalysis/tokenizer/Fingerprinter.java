@@ -1,13 +1,23 @@
 package com.vk.codeanalysis.tokenizer;
 
-import org.treesitter.*;
+import org.treesitter.TSInputEncoding;
+import org.treesitter.TSLanguage;
+import org.treesitter.TSParser;
+import org.treesitter.TSTree;
+import org.treesitter.TreeSitterPython;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
+import java.util.Objects;
 
 public class Fingerprinter {
-    private static final int DEFAULT_K = 20;
-    private static final int DEFAULT_WINNOW_LENGTH = 5;
+    public static final int DEFAULT_K = 20;
+    public static final int DEFAULT_WINNOW_LENGTH = 5;
+    private static final String COMMENT_TYPE_STRING = "comment";
     private final TSParser tsParser;
     private final int k;
     private final int winnowLength;
@@ -42,12 +52,17 @@ public class Fingerprinter {
         KGram kGram = new KGram(k);
         return new WinnowingIterator(
                 new MapIterator<>(
-                        new TSTreeDFS(tree.getRootNode()),
+                        new FilteringIterator<>(
+                                new TSTreeDFS(
+                                        tree.getRootNode()
+                                ),
+                                node -> !Objects.equals(node.getType(), COMMENT_TYPE_STRING)
+                        ),
                         (node) -> {
                             kGram.put(node.getSymbol());
                             return kGram.getHashCode();
                         }
-                ), 5
+                ), winnowLength
         );
     }
 
