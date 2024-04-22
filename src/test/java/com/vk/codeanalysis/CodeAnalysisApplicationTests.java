@@ -11,9 +11,4 @@ class CodeAnalysisApplicationTests {
 
     }
 
-    @Test
-    void proceedSolutionsTest() {
-
-    }
-
 }
