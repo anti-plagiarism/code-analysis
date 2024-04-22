@@ -1,6 +1,8 @@
-package com.vk.codeanalysis.tokenizer;
+package com.vk.codeanalysis.plagiarismalg;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class WinnowingIterator implements Iterator<Integer> {
     private final Iterator<Integer> iterator;
@@ -9,6 +11,7 @@ public class WinnowingIterator implements Iterator<Integer> {
     private boolean filled = false;
     private int counter = 0;
     private int minValue;
+
     public WinnowingIterator(Iterator<Integer> iterator, int k) {
         this.iterator = iterator;
         this.k = k;

@@ -22,12 +22,20 @@ repositories {
 }
 
 dependencies {
-    // add tree sitter
+//    tree sitter
     implementation 'io.github.bonede:tree-sitter:0.20.8'
-    // add python parser
+
+//    python parser
     implementation 'io.github.bonede:tree-sitter-python:0.20.4'
+//    c++ parser
+    implementation("io.github.bonede:tree-sitter-cpp:0.20.3")
+//    java parser
+    implementation "io.github.bonede:tree-sitter-java:0.20.2"
+
+//    one-nio
     implementation 'ru.odnoklassniki:one-nio:1.7.1'
-//  spring
+
+//    spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
 //    open-api

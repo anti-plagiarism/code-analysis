@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.tokenizer;
+package com.vk.codeanalysis.plagiarismalg;
 
 import java.util.Iterator;
 import java.util.function.Function;
@@ -6,10 +6,12 @@ import java.util.function.Function;
 public class MapIterator<I, O> implements Iterator<O> {
     private final Iterator<I> input;
     private final Function<I, O> function;
+
     public MapIterator(Iterator<I> inputIterator, Function<I, O> function) {
         this.input = inputIterator;
         this.function = function;
     }
+
     @Override
     public boolean hasNext() {
         return input.hasNext();

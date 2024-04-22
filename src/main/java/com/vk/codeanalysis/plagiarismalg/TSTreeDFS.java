@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.tokenizer;
+package com.vk.codeanalysis.plagiarismalg;
 
 import org.treesitter.TSNode;
 
@@ -12,6 +12,7 @@ public class TSTreeDFS implements Iterator<TSNode> {
     public TSTreeDFS(TSNode root) {
         trace.push(new Tuple<>(root, 0));
     }
+
     @Override
     public boolean hasNext() {
         if (trace.isEmpty()) {

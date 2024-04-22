@@ -8,6 +8,12 @@ class CodeAnalysisApplicationTests {
 
     @Test
     void contextLoads() {
+
+    }
+
+    @Test
+    void proceedSolutionsTest() {
+
     }
 
 }

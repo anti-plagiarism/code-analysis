@@ -1,8 +1,16 @@
-package com.vk.codeanalysis.tokenizer;
+package com.vk.codeanalysis.plagiarismalg;
 
-import org.treesitter.*;
+import org.treesitter.TSInputEncoding;
+import org.treesitter.TSLanguage;
+import org.treesitter.TSParser;
+import org.treesitter.TSTree;
+import org.treesitter.TreeSitterPython;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 
 public class Fingerprinter {
@@ -22,6 +30,20 @@ public class Fingerprinter {
         this.winnowLength = winnowLength;
     }
 
+    public Iterator<Integer> getFingerprints(String file)   {
+        TSTree tree = tsParser.parseStringEncoding(null, file, TSInputEncoding.TSInputEncodingUTF8);
+        KGram kGram = new KGram(k);
+        return new WinnowingIterator(
+                new MapIterator<>(
+                        new TSTreeDFS(tree.getRootNode()),
+                        (node) -> {
+                            kGram.put(node.getSymbol());
+                            return kGram.getHashCode();
+                        }
+                ), 5
+        );
+    }
+
     private static String readFile(File file) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             StringBuilder ans = new StringBuilder();
@@ -37,7 +59,7 @@ public class Fingerprinter {
         }
     }
 
-    public Iterator<Integer> getFingerprints(File file) throws IOException {
+    public Iterator<Integer> getFingerprintsFromFile(File file) throws IOException {
         TSTree tree = tsParser.parseStringEncoding(null, readFile(file), TSInputEncoding.TSInputEncodingUTF8);
         KGram kGram = new KGram(k);
         return new WinnowingIterator(
@@ -60,7 +82,7 @@ public class Fingerprinter {
         TSLanguage lang = new TreeSitterPython();
         tSparser.setLanguage(lang);
         Fingerprinter fingerprinter = new Fingerprinter(tSparser);
-        Iterator<Integer> fingerprints = fingerprinter.getFingerprints(file);
+        Iterator<Integer> fingerprints = fingerprinter.getFingerprintsFromFile(file);
         while (fingerprints.hasNext()) {
             Integer fingerprint = fingerprints.next();
             System.out.println(fingerprint);
