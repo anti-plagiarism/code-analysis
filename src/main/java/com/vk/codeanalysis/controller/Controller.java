@@ -33,7 +33,7 @@ public class Controller {
     }
 
     @GetMapping
-    @Operation(summary = "Предоставить решение в обработку")
+    @Operation(summary = "Получить отчет")
     public ResponseEntity<String> getReport(@RequestBody SolutionGetRequest request) {
         float similarityThreshold = request.getSimilarityThreshold();
         if (similarityThreshold < 0 || similarityThreshold > 100) {
