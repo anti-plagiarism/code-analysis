@@ -1,6 +1,8 @@
 package com.vk.codeanalysis.tokenizer;
 
-import org.treesitter.*;
+import org.treesitter.TSLanguage;
+import org.treesitter.TSParser;
+import org.treesitter.TreeSitterCpp;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,8 +13,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PlagiarismDetector {
     final Fingerprinter fingerprinter;
@@ -48,7 +55,7 @@ public class PlagiarismDetector {
     }
 
     public static void main(String[] args) throws IOException {
-        PlagiarismDetector plagiarismDetector = new PlagiarismDetector(new TreeSitterPython());
+        PlagiarismDetector plagiarismDetector = new PlagiarismDetector(new TreeSitterCpp());
         System.out.println("Input directory: ");
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(System.in));
@@ -56,7 +63,7 @@ public class PlagiarismDetector {
         Files.walkFileTree(file, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if (file.toString().endsWith(".py")) {
+                if (file.toString().endsWith(".cpp")) {
                     System.out.println(file);
                     try {
                         CollisionReport report = plagiarismDetector.processFile(file.toFile());
