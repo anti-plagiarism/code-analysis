@@ -9,7 +9,7 @@ public class WinnowingIterator implements Iterator<Integer> {
     private final int[] window;
     private final int k;
     private boolean filled = false;
-    private int counter = 0;
+    private int counter;
     private int minValue;
 
     public WinnowingIterator(Iterator<Integer> iterator, int k) {

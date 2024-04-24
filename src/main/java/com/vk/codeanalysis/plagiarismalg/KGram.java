@@ -11,8 +11,9 @@ public class KGram {
     protected final int xPowerK;
     protected final int x = 2;
     protected final int q = (1 << 31) - 1;
+
     @Getter
-    protected int hashCode = 0;
+    protected int hashCode;
 
     public KGram(int k) {
         this.queue = new ArrayDeque<>(k);

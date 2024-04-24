@@ -18,7 +18,7 @@ public class TSTreeDFS implements Iterator<TSNode> {
         if (trace.isEmpty()) {
             return false;
         }
-        if (trace.peek().first.getChildCount() > trace.peek().second) {
+        if (trace.peek().getFirst().getChildCount() > trace.peek().getSecond()) {
             return true;
         }
         trace.pop();
@@ -30,10 +30,10 @@ public class TSTreeDFS implements Iterator<TSNode> {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        TSNode nowNode = trace.peek().first;
-        int nowChild = trace.peek().second;
-        trace.peek().second = nowChild + 1;
+        TSNode nowNode = trace.peek().getFirst();
+        int nowChild = trace.peek().getSecond();
+        trace.peek().setSecond(nowChild + 1);
         trace.push(new Tuple<>(nowNode.getChild(nowChild), 0));
-        return trace.peek().first;
+        return trace.peek().getFirst();
     }
 }

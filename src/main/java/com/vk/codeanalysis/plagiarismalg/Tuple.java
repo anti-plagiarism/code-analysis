@@ -1,8 +1,13 @@
 package com.vk.codeanalysis.plagiarismalg;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Tuple<T, U> {
-    public T first;
-    public U second;
+    private T first;
+    private U second;
 
     public Tuple(T first, U second) {
         this.first = first;

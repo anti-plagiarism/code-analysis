@@ -1,11 +1,13 @@
 package com.vk.codeanalysis.service;
 
 import com.vk.codeanalysis.plagiarismalg.CollisionReport;
+import com.vk.codeanalysis.plagiarismalg.Language;
 import com.vk.codeanalysis.plagiarismalg.PlagiarismDetector;
 import com.vk.codeanalysis.plagiarismalg.TaskCollector;
 import com.vk.codeanalysis.entity.SolutionGetRequest;
 import com.vk.codeanalysis.entity.SolutionPutRequest;
-import lombok.RequiredArgsConstructor;
+import com.vk.codeanalysis.utils.LanguageUtil;
+import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -22,7 +24,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Service
-@RequiredArgsConstructor
 public class DistributorService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributorService.class);
     private static final int CPU_THREADS_COUNT = Runtime.getRuntime().availableProcessors();
@@ -37,21 +38,25 @@ public class DistributorService {
             new ThreadPoolExecutor.AbortPolicy()
     );
 
-    private final Map<String, TaskCollector> collectors =
+    private final Map<Language, TaskCollector> collectors =
             Map.of(
-                    "java", new TaskCollector(new TreeSitterJava()),
-                    "cpp", new TaskCollector(new TreeSitterCpp()),
-                    "python", new TaskCollector(new TreeSitterPython())
+                    Language.JAVA, new TaskCollector(new TreeSitterJava()),
+                    Language.CPP, new TaskCollector(new TreeSitterCpp()),
+                    Language.PYTHON, new TaskCollector(new TreeSitterPython())
             );
 
-    public void put(SolutionPutRequest request) {
-        TaskCollector collector = collectors.get(request.getLang().toLowerCase());
+    public void put(SolutionPutRequest request) throws BadRequestException {
+        TaskCollector collector = collectors.get(
+                LanguageUtil.fromString(
+                        request.lang().toLowerCase()));
 
-        assert collector != null;
+        if (collector == null) {
+            throw new BadRequestException("Unsupported language");
+        }
 
         executor.execute(() -> {
             try {
-                collector.add(request.getTaskId(), request.getSolutionId(), request.getProgram());
+                collector.add(request.taskId(), request.solutionId(), request.program());
             } catch (IOException e) {
                 LOGGER.error("Error while file processing");
                 throw new UncheckedIOException(e);
@@ -59,17 +64,23 @@ public class DistributorService {
         });
     }
 
-    public String get(SolutionGetRequest request) {
+    public String get(SolutionGetRequest request) throws BadRequestException {
+        float similarityThreshold = request.similarityThreshold();
+        if (similarityThreshold < 0 || similarityThreshold > 100) {
+            throw new BadRequestException("Wrong similarity threshold value");
+        }
+
         StringBuilder sb = new StringBuilder();
         sb.append("## Отчет о сравнении решений участников")
                 .append("\n\n## Порог совпадения = ")
-                .append(request.getSimilarityThreshold())
+                .append(request.similarityThreshold())
                 .append("\n\n\n## Подробный отчет о совпадениях\n");
 
         int similarityCounter = 1;
-        for (Map.Entry<String, TaskCollector> collectorEntry : collectors.entrySet()) {
+        for (Map.Entry<Language, TaskCollector> collectorEntry : collectors.entrySet()) {
 
-            sb.append("\nЯзык ").append(collectorEntry.getKey()).append("\n");
+            String language = LanguageUtil.toString(collectorEntry.getKey());
+            sb.append("\n### Язык ").append(language).append("\n");
             for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
 
                 for (Map.Entry<Long, CollisionReport> reportsEntry : detectorsEntry.getValue().getReports().entrySet()) {
@@ -79,8 +90,8 @@ public class DistributorService {
 
                         float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
 
-                        if (similarity >= request.getSimilarityThreshold()) {
-                            sb.append("### Совпадение ")
+                        if (similarity >= request.similarityThreshold()) {
+                            sb.append("#### Совпадение ")
                                     .append(similarityCounter++).append("\n")
                                     .append("id1=").append(reportsEntry.getKey())
                                     .append(" и id2=").append(collisionEntry.getKey())

@@ -4,7 +4,8 @@ import com.vk.codeanalysis.entity.SolutionGetRequest;
 import com.vk.codeanalysis.entity.SolutionPutRequest;
 import com.vk.codeanalysis.service.DistributorService;
 import io.swagger.v3.oas.annotations.Operation;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v0/solution")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class Controller {
 
     private final DistributorService distributorService;
@@ -25,6 +26,8 @@ public class Controller {
     public ResponseEntity<String> putSolution(@RequestBody SolutionPutRequest request) {
         try {
             distributorService.put(request);
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
@@ -35,12 +38,13 @@ public class Controller {
     @GetMapping
     @Operation(summary = "Получить отчет")
     public ResponseEntity<String> getReport(@RequestBody SolutionGetRequest request) {
-        float similarityThreshold = request.getSimilarityThreshold();
-        if (similarityThreshold < 0 || similarityThreshold > 100) {
+        try {
+            String report = distributorService.get(request);
+            return ResponseEntity.ok().body(report);
+        } catch (BadRequestException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
-
-        String report = distributorService.get(request);
-        return ResponseEntity.ok().body(report);
     }
 }

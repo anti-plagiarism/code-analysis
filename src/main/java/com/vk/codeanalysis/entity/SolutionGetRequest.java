@@ -1,8 +1,7 @@
 package com.vk.codeanalysis.entity;
 
-import lombok.Getter;
+public record SolutionGetRequest(
+        float similarityThreshold
+) {
 
-@Getter
-public class SolutionGetRequest {
-    private float similarityThreshold;
 }

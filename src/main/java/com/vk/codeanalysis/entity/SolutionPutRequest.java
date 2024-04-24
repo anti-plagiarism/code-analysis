@@ -1,13 +1,10 @@
 package com.vk.codeanalysis.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+public record SolutionPutRequest(
+        Long taskId,
+        Long solutionId,
+        String lang,
+        String program
+) {
 
-@AllArgsConstructor
-@Getter
-public class SolutionPutRequest {
-    private Long taskId;
-    private Long solutionId;
-    private String lang;
-    private String program;
 }

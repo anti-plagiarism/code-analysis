@@ -2,6 +2,7 @@ package com.vk.codeanalysis.plagiarismalg;
 
 import org.treesitter.TSInputEncoding;
 import org.treesitter.TSLanguage;
+import org.treesitter.TSNode;
 import org.treesitter.TSParser;
 import org.treesitter.TSTree;
 import org.treesitter.TreeSitterPython;
@@ -30,18 +31,21 @@ public class Fingerprinter {
         this.winnowLength = winnowLength;
     }
 
-    public Iterator<Integer> getFingerprints(String file)   {
+    public Iterator<Integer> getFingerprints(String file) {
         TSTree tree = tsParser.parseStringEncoding(null, file, TSInputEncoding.TSInputEncodingUTF8);
         KGram kGram = new KGram(k);
-        return new WinnowingIterator(
-                new MapIterator<>(
-                        new TSTreeDFS(tree.getRootNode()),
-                        (node) -> {
-                            kGram.put(node.getSymbol());
-                            return kGram.getHashCode();
-                        }
-                ), 5
+
+        TSTreeDFS dfsIterator = new TSTreeDFS(tree.getRootNode());
+
+        MapIterator<TSNode, Integer> mapIterator = new MapIterator<>(
+                dfsIterator,
+                (node) -> {
+                    kGram.put(node.getSymbol());
+                    return kGram.getHashCode();
+                }
         );
+
+        return new WinnowingIterator(mapIterator, 5);
     }
 
     private static String readFile(File file) throws IOException {

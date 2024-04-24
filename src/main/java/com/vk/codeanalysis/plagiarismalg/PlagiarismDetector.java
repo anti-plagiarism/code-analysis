@@ -14,7 +14,7 @@ import java.util.Map;
 public class PlagiarismDetector {
     private final Fingerprinter fingerprinter;
     private final Map<Integer, List<Long>> fingerprintBase = new HashMap<>();
-    final Map<Long, CollisionReport> reports = new HashMap<>();
+    private final Map<Long, CollisionReport> reports = new HashMap<>();
 
     public PlagiarismDetector(TSLanguage language) {
         TSParser tsParser = new TSParser();
