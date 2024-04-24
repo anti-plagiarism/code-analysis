@@ -17,12 +17,7 @@ public class TaskCollector {
     }
 
     public void add(long taskId, long solutionId, String program) throws IOException {
-        PlagiarismDetector detector = detectors.get(taskId);
-        if (detector == null) {
-            detector = new PlagiarismDetector(language);
-            detectors.put(taskId, detector);
-        }
-
+        PlagiarismDetector detector = detectors.computeIfAbsent(taskId, id -> new PlagiarismDetector(language));
         detector.processFile(solutionId, program);
     }
 }
