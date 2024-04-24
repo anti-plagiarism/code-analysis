@@ -12,6 +12,8 @@ import java.util.Map;
 
 @Getter
 public class PlagiarismDetector {
+    private static final int WINNOW_LENGTH = 5;
+
     private final Fingerprinter fingerprinter;
     private final Map<Integer, List<Long>> fingerprintBase = new HashMap<>();
     private final Map<Long, CollisionReport> reports = new HashMap<>();
@@ -23,7 +25,7 @@ public class PlagiarismDetector {
     }
 
     public void processFile(long solutionId, String file) {
-        Iterator<Integer> fingerprints = fingerprinter.getFingerprints(file);
+        Iterator<Integer> fingerprints = fingerprinter.getFingerprints(file, WINNOW_LENGTH);
         CollisionReport collisionReport = new CollisionReport();
 
         while (fingerprints.hasNext()) {

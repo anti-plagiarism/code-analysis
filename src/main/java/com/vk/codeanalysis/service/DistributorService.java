@@ -6,7 +6,6 @@ import com.vk.codeanalysis.plagiarismalg.PlagiarismDetector;
 import com.vk.codeanalysis.plagiarismalg.TaskCollector;
 import com.vk.codeanalysis.entity.SolutionGetRequest;
 import com.vk.codeanalysis.entity.SolutionPutRequest;
-import com.vk.codeanalysis.utils.LanguageUtil;
 import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ public class DistributorService {
 
     public void put(SolutionPutRequest request) throws BadRequestException {
         TaskCollector collector = collectors.get(
-                LanguageUtil.fromString(
+                Language.fromString(
                         request.lang().toLowerCase()));
 
         if (collector == null) {
@@ -79,7 +78,7 @@ public class DistributorService {
         int similarityCounter = 1;
         for (Map.Entry<Language, TaskCollector> collectorEntry : collectors.entrySet()) {
 
-            String language = LanguageUtil.toString(collectorEntry.getKey());
+            String language = Language.toString(collectorEntry.getKey());
             sb.append("\n### Язык ").append(language).append("\n");
             for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
 

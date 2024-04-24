@@ -31,7 +31,7 @@ public class Fingerprinter {
         this.winnowLength = winnowLength;
     }
 
-    public Iterator<Integer> getFingerprints(String file) {
+    public Iterator<Integer> getFingerprints(String file, int winnowLength) {
         TSTree tree = tsParser.parseStringEncoding(null, file, TSInputEncoding.TSInputEncodingUTF8);
         KGram kGram = new KGram(k);
 
@@ -45,7 +45,7 @@ public class Fingerprinter {
                 }
         );
 
-        return new WinnowingIterator(mapIterator, 5);
+        return new WinnowingIterator(mapIterator, winnowLength);
     }
 
     private static String readFile(File file) throws IOException {

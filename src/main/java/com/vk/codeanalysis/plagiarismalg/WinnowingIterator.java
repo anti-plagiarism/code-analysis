@@ -37,9 +37,8 @@ public class WinnowingIterator implements Iterator<Integer> {
             if (!filled) {
                 if (!iterator.hasNext()) {
                     return newValue;
-                } else {
-                    continue;
                 }
+                continue;
             }
             if (prevValue == minValue) {
                 minValue = Integer.MAX_VALUE;
@@ -62,7 +61,7 @@ public class WinnowingIterator implements Iterator<Integer> {
 
     public static void main(String[] args) {
         List<Integer> list = Arrays.asList(77, 74, 42, 17, 98, 50, 17, 98, 8, 88, 67, 39, 77, 74, 42, 17, 98);
-        Iterator<Integer> iterator = new WinnowingIterator(list.iterator(), 1);
+        Iterator<Integer> iterator = new WinnowingIterator(list.iterator(), 5);
         while (iterator.hasNext()) {
             System.out.println(iterator.next());
         }
