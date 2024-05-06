@@ -5,17 +5,17 @@ import org.treesitter.TSLanguage;
 import org.treesitter.TSParser;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Getter
 public class PlagiarismDetector {
     private static final int WINNOW_LENGTH = 5;
 
     private final Fingerprinter fingerprinter;
-    private final Map<Integer, List<Long>> fingerprintBase = new HashMap<>();
+    private final Map<Integer, Set<Long>> fingerprintBase = new HashMap<>();
     private final Map<Long, CollisionReport> reports = new HashMap<>();
 
     public PlagiarismDetector(TSLanguage language) {
@@ -32,9 +32,9 @@ public class PlagiarismDetector {
             int fingerprint = fingerprints.next();
             collisionReport.addFingerprint();
 
-            List<Long> files = (fingerprintBase.containsKey(fingerprint))
+            Set<Long> files = (fingerprintBase.containsKey(fingerprint))
                     ? fingerprintBase.get(fingerprint)
-                    : new LinkedList<>();
+                    : new HashSet<>();
 
             for (Long collisionSolutionId : files) {
                 if (collisionSolutionId != solutionId) {
