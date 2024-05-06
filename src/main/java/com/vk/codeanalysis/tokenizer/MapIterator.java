@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.plagiarismalg;
+package com.vk.codeanalysis.tokenizer;
 
 import java.util.Iterator;
 import java.util.function.Function;
