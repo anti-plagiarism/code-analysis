@@ -23,7 +23,7 @@ public class ReportController {
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решениям, у которых схожесть больше, чем заданный коэффициент")
     public ResponseEntity<String> getReport(
-            @RequestParam(name = "similarityThreshold", defaultValue = "0.5") @Parameter(description = "Параметр сходства") float similarityThreshold
+            @RequestParam(name = "similarity_threshold", defaultValue = "50") @Parameter(description = "Параметр сходства") float similarityThreshold
     ) {
         String report = distributorService.get(similarityThreshold);
         return ResponseEntity.ok().body(report);
