@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.plagiarismalg;
+package com.vk.codeanalysis.tokenizer;
 
 import org.treesitter.TSNode;
 

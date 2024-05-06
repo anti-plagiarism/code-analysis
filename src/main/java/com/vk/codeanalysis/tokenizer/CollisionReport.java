@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.plagiarismalg;
+package com.vk.codeanalysis.tokenizer;
 
 import lombok.Getter;
 
@@ -7,12 +7,9 @@ import java.util.Map;
 
 @Getter
 public class CollisionReport {
-    private final Map<Long, Integer> collisions;
-    private int totalFingerprints;
+    private final Map<Long, Integer> collisions = new LinkedHashMap<>();
 
-    public CollisionReport() {
-        collisions = new LinkedHashMap<>();
-    }
+    private int totalFingerprints;
 
     public void addFingerprint() {
         totalFingerprints++;

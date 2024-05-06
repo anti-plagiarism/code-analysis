@@ -1,5 +1,6 @@
-package com.vk.codeanalysis.plagiarismalg;
+package com.vk.codeanalysis.tokenizer;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.treesitter.TSInputEncoding;
 import org.treesitter.TSLanguage;
 import org.treesitter.TSNode;
@@ -15,20 +16,16 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 
 public class Fingerprinter {
-    private static final int DEFAULT_K = 20;
-    private static final int DEFAULT_WINNOW_LENGTH = 5;
     private final TSParser tsParser;
-    private final int k;
-    private final int winnowLength;
+
+    @Value("${fingerprinter.k}")
+    private int k;
+
+    @Value("${fingerprinter.window-length}")
+    private int windowLength;
 
     public Fingerprinter(TSParser tsParser) {
-        this(tsParser, DEFAULT_K, DEFAULT_WINNOW_LENGTH);
-    }
-
-    public Fingerprinter(TSParser tsParser, int k, int winnowLength) {
         this.tsParser = tsParser;
-        this.k = k;
-        this.winnowLength = winnowLength;
     }
 
     public Iterator<Integer> getFingerprints(String file, int winnowLength) {

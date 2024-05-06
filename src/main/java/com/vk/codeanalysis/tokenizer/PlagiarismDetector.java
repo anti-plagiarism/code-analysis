@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.plagiarismalg;
+package com.vk.codeanalysis.tokenizer;
 
 import lombok.Getter;
 import org.treesitter.TSLanguage;
@@ -19,14 +19,14 @@ public class PlagiarismDetector {
     private final Map<Long, CollisionReport> reports = new HashMap<>();
 
     public PlagiarismDetector(TSLanguage language) {
-        TSParser tsParser = new TSParser();
+        var tsParser = new TSParser();
         tsParser.setLanguage(language);
         this.fingerprinter = new Fingerprinter(tsParser);
     }
 
     public void processFile(long solutionId, String file) {
         Iterator<Integer> fingerprints = fingerprinter.getFingerprints(file, WINNOW_LENGTH);
-        CollisionReport collisionReport = new CollisionReport();
+        var collisionReport = new CollisionReport();
 
         while (fingerprints.hasNext()) {
             int fingerprint = fingerprints.next();

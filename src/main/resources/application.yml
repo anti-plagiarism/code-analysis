@@ -1,2 +1,14 @@
 server:
   port: 8085
+
+fingerprinter:
+  k: 20
+  window-length: 5
+
+spring:
+  mvc:
+    static-path-pattern: /swagger*
+
+springdoc:
+  api-docs:
+    path: /api-docs
