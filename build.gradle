@@ -28,7 +28,7 @@ dependencies {
 //    python parser
     implementation 'io.github.bonede:tree-sitter-python:0.20.4'
 //    c++ parser
-    implementation("io.github.bonede:tree-sitter-cpp:0.20.3")
+    implementation "io.github.bonede:tree-sitter-cpp:0.22.0"
 //    java parser
     implementation "io.github.bonede:tree-sitter-java:0.20.2"
 
