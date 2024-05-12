@@ -23,7 +23,8 @@ public class SolutionController {
     @PutMapping
     @Operation(summary = "Предоставить решение в обработку", description = "Позволяет загрузить пользовательское решение в систему")
     public ResponseEntity<String> putSolution(
-            @RequestBody @Parameter(description = "Параметр для предоставления пользовательских решений") SolutionPutRequest request
+            @RequestBody @Parameter(description = "Параметр для предоставления пользовательских решений")
+            SolutionPutRequest request
     ) {
         distributorService.put(request);
         return new ResponseEntity<>(HttpStatus.CREATED);

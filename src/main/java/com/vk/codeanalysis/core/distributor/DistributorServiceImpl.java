@@ -1,9 +1,8 @@
 package com.vk.codeanalysis.core.distributor;
 
+import com.vk.codeanalysis.core.report_generator.ReportGeneratorServiceImpl;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV1;
-import com.vk.codeanalysis.tokenizer.CollisionReport;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
-import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 public class DistributorServiceImpl implements DistributorServiceV0 {
     private final ExecutorService executor;
     private final Map<Language, TaskCollectorV1> collectors;
+    private final ReportGeneratorServiceImpl reportGenerator;
 
     @Override
     public void put(SolutionPutRequest request) {
@@ -34,49 +34,16 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
     }
 
     @Override
-    public String get(float similarityThreshold) {
-        if (similarityThreshold < 0 || similarityThreshold > 100) {
+    public String getReport(float thresholdStart, float thresholdEnd) {
+
+        if (
+                thresholdStart < 0 || thresholdStart > 100
+                || thresholdEnd < 0 || thresholdEnd > 100
+                || thresholdStart > thresholdEnd
+        ) {
             throw new IllegalArgumentException("Wrong similarity threshold value");
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Отчет о сравнении решений участников")
-                .append("\n\n## Порог совпадения = ")
-                .append(similarityThreshold)
-                .append("\n\n\n## Подробный отчет о совпадениях\n");
-
-        int similarityCounter = 1;
-        for (var collectorEntry : collectors.entrySet()) {
-            String language = collectorEntry.getKey().getName();
-            sb.append("\n### Язык ")
-                    .append(language)
-                    .append("\n");
-            for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
-
-                for (Map.Entry<Long, CollisionReport> reportsEntry : detectorsEntry.getValue().getReports().entrySet()) {
-
-                    int totalFingerprints = reportsEntry.getValue().getTotalFingerprints();
-                    for (Map.Entry<Long, Integer> collisionEntry : reportsEntry.getValue().getCollisions().entrySet()) {
-
-                        float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
-
-                        if (similarity >= similarityThreshold) {
-                            sb.append("#### Совпадение ")
-                                    .append(similarityCounter++)
-                                    .append("\n")
-                                    .append("id1=")
-                                    .append(reportsEntry.getKey())
-                                    .append(" и id2=")
-                                    .append(collisionEntry.getKey())
-                                    .append(" - процент совпадений = ")
-                                    .append(similarity)
-                                    .append("\n");
-                        }
-                    }
-                }
-            }
-        }
-
-        return sb.toString();
+        return reportGenerator.generate(thresholdStart, thresholdEnd);
     }
 }
