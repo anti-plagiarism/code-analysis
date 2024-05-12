@@ -1,7 +1,7 @@
 package com.vk.codeanalysis.config;
 
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
-import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV1;
+import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.tokenizer.TaskCollectorImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +34,7 @@ public class DistributorServiceConfig {
     }
 
     @Bean
-    public Map<Language, TaskCollectorV1> collectors() {
+    public Map<Language, TaskCollectorV0> collectors() {
         return Map.of(
                 Language.JAVA, new TaskCollectorImpl(new TreeSitterJava()),
                 Language.CPP, new TaskCollectorImpl(new TreeSitterCpp()),

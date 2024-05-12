@@ -1,7 +1,7 @@
 package com.vk.codeanalysis.core.distributor;
 
 import com.vk.codeanalysis.core.report_generator.ReportGeneratorServiceImpl;
-import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV1;
+import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
@@ -17,19 +17,24 @@ import java.util.concurrent.ExecutorService;
 @RequiredArgsConstructor
 public class DistributorServiceImpl implements DistributorServiceV0 {
     private final ExecutorService executor;
-    private final Map<Language, TaskCollectorV1> collectors;
+    private final Map<Language, TaskCollectorV0> collectors;
     private final ReportGeneratorServiceImpl reportGenerator;
 
     @Override
     public void put(SolutionPutRequest request) {
-        TaskCollectorV1 collector = collectors.get(request.lang());
+        TaskCollectorV0 collector = collectors.get(request.lang());
 
         if (collector == null) {
             throw new IllegalArgumentException("Unsupported language");
         }
 
         executor.execute(() ->
-                collector.add(request.taskId(), request.solutionId(), request.program())
+                collector.add(
+                        request.taskId(),
+                        request.userId(),
+                        request.solutionId(),
+                        request.program()
+                )
         );
     }
 
