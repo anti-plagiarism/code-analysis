@@ -4,11 +4,7 @@ import lombok.Getter;
 import org.treesitter.TSLanguage;
 import org.treesitter.TSParser;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 public class PlagiarismDetector {
@@ -17,6 +13,7 @@ public class PlagiarismDetector {
     private final Fingerprinter fingerprinter;
     private final Map<Integer, List<Long>> fingerprintBase = new HashMap<>();
     private final Map<Long, CollisionReport> reports = new HashMap<>();
+    private final Set<Integer> ignoredFingerprints = new HashSet<>();
 
     public PlagiarismDetector(TSLanguage language) {
         var tsParser = new TSParser();
@@ -31,6 +28,10 @@ public class PlagiarismDetector {
         while (fingerprints.hasNext()) {
             int fingerprint = fingerprints.next();
             collisionReport.addFingerprint();
+
+            if (ignoredFingerprints.contains(fingerprint)) {
+                continue;
+            }
 
             List<Long> files = (fingerprintBase.containsKey(fingerprint))
                     ? fingerprintBase.get(fingerprint)
@@ -48,5 +49,13 @@ public class PlagiarismDetector {
         }
 
         reports.put(solutionId, collisionReport);
+    }
+
+    public void addIgnoredFile(String file) {
+        Iterator<Integer> fingerprints = fingerprinter.getFingerprints(file, WINNOW_LENGTH);
+        while (fingerprints.hasNext()) {
+            int fingerprint = fingerprints.next();
+            ignoredFingerprints.add(fingerprint);
+        }
     }
 }
