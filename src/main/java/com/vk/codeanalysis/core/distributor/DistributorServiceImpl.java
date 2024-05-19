@@ -1,6 +1,6 @@
 package com.vk.codeanalysis.core.distributor;
 
-import com.vk.codeanalysis.core.report_generator.ReportGeneratorServiceImpl;
+import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
 public class DistributorServiceImpl implements DistributorServiceV0 {
     private final ExecutorService executor;
     private final Map<Language, TaskCollectorV0> collectors;
-    private final ReportGeneratorServiceImpl reportGenerator;
+    private final ReportGeneratorService reportGenerator;
 
     @Override
     public void put(SolutionPutRequest request) {
