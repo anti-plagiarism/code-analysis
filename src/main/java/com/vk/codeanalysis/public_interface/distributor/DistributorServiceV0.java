@@ -1,5 +1,6 @@
 package com.vk.codeanalysis.public_interface.distributor;
 
+import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
 import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
 
 public interface DistributorServiceV0 {
@@ -10,6 +11,7 @@ public interface DistributorServiceV0 {
      */
     void put(SolutionPutRequest request);
 
+    void addIgnored(SolutionIgnoreRequest request);
     /**
      * Получение отчёта, в котором будут находиться все решения,
      * которые имеют схожесть больше, чем similarityThreshold

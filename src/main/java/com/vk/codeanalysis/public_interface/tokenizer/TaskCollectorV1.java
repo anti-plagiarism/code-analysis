@@ -7,5 +7,7 @@ import java.util.Map;
 public interface TaskCollectorV1 {
     void add(long taskId, long solutionId, String program);
 
+    void addIgnored(long taskId, String program);
+
     Map<Long, PlagiarismDetector> getDetectors();
 }

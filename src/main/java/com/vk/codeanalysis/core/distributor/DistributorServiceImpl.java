@@ -1,5 +1,6 @@
 package com.vk.codeanalysis.core.distributor;
 
+import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV1;
 import com.vk.codeanalysis.tokenizer.CollisionReport;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
@@ -30,6 +31,19 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
 
         executor.execute(() ->
                 collector.add(request.taskId(), request.solutionId(), request.program())
+        );
+    }
+
+    @Override
+    public void addIgnored(SolutionIgnoreRequest request) {
+        TaskCollectorV1 collector = collectors.get(request.lang());
+
+        if (collector == null) {
+            throw new IllegalArgumentException("Unsupported language");
+        }
+
+        executor.execute(() ->
+                collector.addIgnored(request.taskId(), request.program())
         );
     }
 
