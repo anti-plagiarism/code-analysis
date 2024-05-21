@@ -3,14 +3,20 @@ package com.vk.codeanalysis.core.report_generator;
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
+import com.vk.codeanalysis.report_dto.SimilarityIntervalDto;
+import com.vk.codeanalysis.report_dto.ReportDto;
+import com.vk.codeanalysis.report_dto.SimilarityDto;
 import com.vk.codeanalysis.tokenizer.CollisionReport;
 import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -20,28 +26,28 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
     private final Map<Language, TaskCollectorV0> collectors;
 
     @Override
-    public String generate(float thresholdStart, float thresholdEnd) {
+    public ReportDto generateReport(
+            float thresholdStart,
+            float thresholdEnd,
+            Set<Long> tasks,
+            Set<Long> users,
+            Set<String> langs
+    ) {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("### Отчет о сравнении решений участников")
-                .append("\n\n#### Порог совпадения = [")
-                .append(thresholdStart)
-                .append(", ")
-                .append(thresholdEnd)
-                .append("]\n");
+        ReportDto reportDto = new ReportDto();
+        Map<String, List<SimilarityDto>> bodyMap = new HashMap<>();
 
-        int similarityCounter = 1;
         for (var collectorEntry : collectors.entrySet()) {
 
             String language = collectorEntry.getKey().getName();
-            sb.append("\n#### Язык ").append(language).append("\n");
+            List<SimilarityDto> similarityList = new ArrayList<>();
 
             for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
 
                 Map<Long, List<Long>> submittedSolutions = detectorsEntry.getValue().getSubmittedSolutions();
                 Map<Long, Long> solutionToUser = detectorsEntry.getValue().getSolutionToUser();
 
-                sb.append("\n#### TaskId = ").append(detectorsEntry.getKey()).append("\n");
+                long taskId = detectorsEntry.getKey();
 
                 for (Map.Entry<Long, CollisionReport> reportsEntry : detectorsEntry.getValue().getReports().entrySet()) {
 
@@ -70,30 +76,35 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                         boolean isInInterval = checkThresholdInterval(similarity, thresholdStart, thresholdEnd);
 
                         if (isInInterval) {
-                            sb.append("##### Совпадение ")
-                                    .append(similarityCounter++)
-                                    .append("\n")
-                                    .append("UserId=")
-                                    .append(baseId)
-                                    .append(" - SolutionId=")
-                                    .append(userBaseSolution)
-                                    .append(" <--> UserId=")
-                                    .append(currId)
-                                    .append(" - SolutionId=")
-                                    .append(userCurrSolution)
-                                    .append("\n\t - Процент совпадений = ")
-                                    .append(similarity)
-                                    .append("\n\n");
+                            similarityList.add(
+                                    new SimilarityDto(
+                                            taskId,
+                                            userBaseSolution,
+                                            baseId,
+                                            userCurrSolution,
+                                            currId,
+                                            similarity
+                                    )
+                            );
                         }
                     }
                 }
             }
+
+            bodyMap.put(language, similarityList);
         }
 
-        return sb.toString();
+        reportDto.setInterval(new SimilarityIntervalDto(thresholdStart, thresholdEnd));
+        reportDto.setTasks(tasks);
+        reportDto.setUsers(users);
+        reportDto.setLanguages(langs);
+        reportDto.setBody(bodyMap);
+
+        return reportDto;
     }
 
     private static boolean checkThresholdInterval(float value, float start, float end) {
         return value >= start && value <= end;
     }
+
 }

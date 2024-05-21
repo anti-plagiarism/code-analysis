@@ -5,6 +5,7 @@ import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Matcher;
@@ -12,7 +13,8 @@ import java.util.regex.Pattern;
 
 @Slf4j
 public class SolutionPathParser {
-    private static final Pattern SOLUTION_PATH_PATTERN = Pattern.compile("/(\\d+)_task/(\\d+)_user/(\\d+)_solution\\.([a-zA-Z]+)");
+    private static final Pattern SOLUTION_PATH_PATTERN = Pattern.compile(
+            "/(\\d+)_task/(\\d+)_user/(\\d+)_solution\\.([a-zA-Z]+)");
     private static final int TASK_GROUP = 1;
     private static final int USER_GROUP = 2;
     private static final int SOLUTION_GROUP = 3;
@@ -63,7 +65,7 @@ public class SolutionPathParser {
             Path path = Path.of(solutionPath);
             return Files.readString(path);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read program from file: " + solutionPath, e);
+            throw new UncheckedIOException("Failed to read program from file: " + solutionPath, e);
         }
     }
 }

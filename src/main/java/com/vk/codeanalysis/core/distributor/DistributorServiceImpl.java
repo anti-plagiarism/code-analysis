@@ -5,11 +5,13 @@ import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
+import com.vk.codeanalysis.report_dto.ReportDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 @Service
@@ -39,16 +41,20 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
     }
 
     @Override
-    public String getReport(float thresholdStart, float thresholdEnd) {
+    public ReportDto getReport(float thresholdStart,
+                                   float thresholdEnd,
+                                   Set<Long> tasksId,
+                                   Set<Long> usersId,
+                                   Set<String> langs) {
 
         if (
                 thresholdStart < 0 || thresholdStart > 100
-                || thresholdEnd < 0 || thresholdEnd > 100
-                || thresholdStart > thresholdEnd
+                        || thresholdEnd < 0 || thresholdEnd > 100
+                        || thresholdStart > thresholdEnd
         ) {
             throw new IllegalArgumentException("Wrong similarity threshold value");
         }
 
-        return reportGenerator.generate(thresholdStart, thresholdEnd);
+        return reportGenerator.generateReport(thresholdStart, thresholdEnd, tasksId, usersId, langs);
     }
 }

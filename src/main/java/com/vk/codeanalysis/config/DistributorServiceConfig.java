@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class DistributorServiceConfig {
     private static final int CPU_THREADS_COUNT = Runtime.getRuntime().availableProcessors();
     private static final int KEEP_ALIVE_SECONDS = 3;
-    private static final int MAX_CAPACITY = 300;
+    private static final int MAX_CAPACITY = 1000;
 
     @Bean
     public ExecutorService executor() {

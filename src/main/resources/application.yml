@@ -1,6 +1,9 @@
 server:
   port: 8085
 
+file-tracker:
+  path: ВАШ ПУТЬ К РЕШЕНИЯМ !
+
 spring:
   mvc:
     static-path-pattern: /swagger*

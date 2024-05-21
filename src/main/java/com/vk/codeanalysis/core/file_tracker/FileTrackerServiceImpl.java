@@ -6,9 +6,11 @@ import com.vk.codeanalysis.public_interface.file_tracker.FileTrackerService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,10 +28,13 @@ public class FileTrackerServiceImpl implements FileTrackerService {
     private final ExecutorService executor;
     private final DistributorServiceV0 distributorService;
 
+    @Value("${file-tracker.path}")
+    private String trackPath;
+
     @PostConstruct
     @Override
     public void trackSolutions() {
-        Path rootPath = Path.of("C:/Users/dimas/Downloads/anticheat_sample_solutions");
+        Path rootPath = Path.of(trackPath);
         executor.execute(() -> {
             try {
                 Map<Long, SolutionPutRequest> latestSolutions = new HashMap<>();
@@ -51,7 +56,7 @@ public class FileTrackerServiceImpl implements FileTrackerService {
 
                 latestSolutions.values().forEach(distributorService::put);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         });
     }
