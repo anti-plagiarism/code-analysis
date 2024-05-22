@@ -1,6 +1,5 @@
 package com.vk.codeanalysis.tokenizer;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.treesitter.TSInputEncoding;
 import org.treesitter.TSLanguage;
 import org.treesitter.TSNode;
@@ -16,13 +15,10 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 
 public class Fingerprinter {
+    private final static int K = 20;
+    private final static int WINDOW_LENGTH = 5;
+
     private final TSParser tsParser;
-
-    @Value("${fingerprinter.k}")
-    private int k;
-
-    @Value("${fingerprinter.window-length}")
-    private int windowLength;
 
     public Fingerprinter(TSParser tsParser) {
         this.tsParser = tsParser;
@@ -30,7 +26,7 @@ public class Fingerprinter {
 
     public Iterator<Integer> getFingerprints(String file, int winnowLength) {
         TSTree tree = tsParser.parseStringEncoding(null, file, TSInputEncoding.TSInputEncodingUTF8);
-        KGram kGram = new KGram(k);
+        KGram kGram = new KGram(K);
 
         TSTreeDFS dfsIterator = new TSTreeDFS(tree.getRootNode());
 
@@ -62,7 +58,7 @@ public class Fingerprinter {
 
     public Iterator<Integer> getFingerprintsFromFile(File file) throws IOException {
         TSTree tree = tsParser.parseStringEncoding(null, readFile(file), TSInputEncoding.TSInputEncodingUTF8);
-        KGram kGram = new KGram(k);
+        KGram kGram = new KGram(K);
         return new WinnowingIterator(
                 new MapIterator<>(
                         new TSTreeDFS(tree.getRootNode()),
@@ -70,7 +66,7 @@ public class Fingerprinter {
                             kGram.put(node.getSymbol());
                             return kGram.getHashCode();
                         }
-                ), 5
+                ), WINDOW_LENGTH
         );
     }
 

@@ -1,82 +1,103 @@
 package com.vk.codeanalysis.core.distributor;
 
-import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV1;
-import com.vk.codeanalysis.tokenizer.CollisionReport;
-import com.vk.codeanalysis.public_interface.tokenizer.Language;
-import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
+import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
+import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
+import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
+import com.vk.codeanalysis.report_dto.ReportDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DistributorServiceImpl implements DistributorServiceV0 {
-    private final ExecutorService executor;
-    private final Map<Language, TaskCollectorV1> collectors;
+    private final ExecutorService submitExecutor;
+    private final ExecutorService reportExecutor;
+    private final Map<String, TaskCollectorV0> collectors;
+    private final ReportGeneratorService reportGenerator;
 
     @Override
-    public void put(SolutionPutRequest request) {
-        TaskCollectorV1 collector = collectors.get(request.lang());
+    public void put(long taskId, long solutionId, long userId, String lang, String code) {
+        TaskCollectorV0 collector = collectors.get(lang);
 
         if (collector == null) {
             throw new IllegalArgumentException("Unsupported language");
         }
 
-        executor.execute(() ->
-                collector.add(request.taskId(), request.solutionId(), request.program())
+        submitExecutor.execute(() ->
+                collector.add(
+                        taskId,
+                        solutionId,
+                        userId,
+                        code
+                )
         );
     }
 
     @Override
-    public String get(float similarityThreshold) {
-        if (similarityThreshold < 0 || similarityThreshold > 100) {
+    public CompletableFuture<ReportDto> getGeneralReport(float thresholdStart,
+                                                         float thresholdEnd,
+                                                         Set<Long> tasks,
+                                                         Set<Long> users,
+                                                         Set<String> langs) {
+        if (
+                thresholdStart < 0 || thresholdStart > 100
+                        || thresholdEnd < 0 || thresholdEnd > 100
+                        || thresholdStart > thresholdEnd
+        ) {
             throw new IllegalArgumentException("Wrong similarity threshold value");
         }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Отчет о сравнении решений участников")
-                .append("\n\n## Порог совпадения = ")
-                .append(similarityThreshold)
-                .append("\n\n\n## Подробный отчет о совпадениях\n");
+        return CompletableFuture.supplyAsync(
+                () -> reportGenerator.generateGeneralReport(thresholdStart, thresholdEnd, tasks, users, langs),
+                submitExecutor
+        );
+    }
 
-        int similarityCounter = 1;
-        for (var collectorEntry : collectors.entrySet()) {
-            String language = collectorEntry.getKey().getName();
-            sb.append("\n### Язык ")
-                    .append(language)
-                    .append("\n");
-            for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
+    @Override
+    public CompletableFuture<ReportDto> getPrivateReport(long taskId,
+                                                         long solutionId,
+                                                         long userId,
+                                                         String lang,
+                                                         String code) {
+        TaskCollectorV0 collector = collectors.get(lang);
 
-                for (Map.Entry<Long, CollisionReport> reportsEntry : detectorsEntry.getValue().getReports().entrySet()) {
-
-                    int totalFingerprints = reportsEntry.getValue().getTotalFingerprints();
-                    for (Map.Entry<Long, Integer> collisionEntry : reportsEntry.getValue().getCollisions().entrySet()) {
-
-                        float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
-
-                        if (similarity >= similarityThreshold) {
-                            sb.append("#### Совпадение ")
-                                    .append(similarityCounter++)
-                                    .append("\n")
-                                    .append("id1=")
-                                    .append(reportsEntry.getKey())
-                                    .append(" и id2=")
-                                    .append(collisionEntry.getKey())
-                                    .append(" - процент совпадений = ")
-                                    .append(similarity)
-                                    .append("\n");
-                        }
-                    }
-                }
-            }
+        if (collector == null) {
+            throw new IllegalArgumentException("Unsupported language");
         }
 
-        return sb.toString();
+        CompletableFuture<ReportDto> reportDto = CompletableFuture.runAsync(
+                () -> collector.add(taskId, solutionId, userId, code),
+                submitExecutor
+        ).thenApplyAsync(
+                voidResult -> reportGenerator
+                        .generatePrivateReport(taskId, solutionId, userId, lang, code),
+                reportExecutor
+        );
+
+        // TODO обработать исключения
+
+        return reportDto;
     }
+
+    @Override
+    public void addIgnored(SolutionIgnoreRequest request) {
+        TaskCollectorV0 collector = collectors.get(request.lang().getName());
+
+        if (collector == null) {
+            throw new IllegalArgumentException("Unsupported language");
+        }
+
+        submitExecutor.execute(() ->
+                collector.addIgnored(request.taskId(), request.program())
+        );
+    }
+
 }
