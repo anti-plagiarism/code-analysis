@@ -1,7 +1,9 @@
 package com.vk.codeanalysis.core.distributor;
 
 import com.vk.codeanalysis.dto.request.SolutionIgnoreRequest;
+import com.vk.codeanalysis.dto.request.SolutionPutRequest;
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
+import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.dto.report.ReportDto;
@@ -20,24 +22,18 @@ import java.util.concurrent.ExecutorService;
 public class DistributorServiceImpl implements DistributorServiceV0 {
     private final ExecutorService submitExecutor;
     private final ExecutorService reportExecutor;
-    private final Map<String, TaskCollectorV0> collectors;
+    private final Map<Language, TaskCollectorV0> collectors;
     private final ReportGeneratorService reportGenerator;
 
     @Override
-    public void put(long taskId, long solutionId, long userId, String lang, String code) {
-        TaskCollectorV0 collector = collectors.get(lang);
-
-        if (collector == null) {
-            throw new IllegalArgumentException("Unsupported language");
-        }
-
-        submitExecutor.execute(() ->
-                collector.add(
-                        taskId,
-                        solutionId,
-                        userId,
-                        code
-                )
+    public void put(SolutionPutRequest request) {
+        TaskCollectorV0 collector = getCollector(request.lang());
+        //TODO здесь executor генерировал исключения
+        collector.add(
+                request.taskId(),
+                request.solutionId(),
+                request.userId(),
+                request.program()
         );
     }
 
@@ -46,12 +42,9 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
                                                          float thresholdEnd,
                                                          Set<Long> tasks,
                                                          Set<Long> users,
-                                                         Set<String> langs) {
-        if (
-                thresholdStart < 0 || thresholdStart > 100
-                        || thresholdEnd < 0 || thresholdEnd > 100
-                        || thresholdStart > thresholdEnd
-        ) {
+                                                         Set<Language> langs) {
+        if (isThresholdIncorrect(thresholdStart) || isThresholdIncorrect(thresholdEnd)
+                || thresholdStart > thresholdEnd) {
             throw new IllegalArgumentException("Wrong similarity threshold value");
         }
 
@@ -65,20 +58,15 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
     public CompletableFuture<ReportDto> getPrivateReport(long taskId,
                                                          long solutionId,
                                                          long userId,
-                                                         String lang,
+                                                         Language lang,
                                                          String code) {
-        TaskCollectorV0 collector = collectors.get(lang);
-
-        if (collector == null) {
-            throw new IllegalArgumentException("Unsupported language");
-        }
+        TaskCollectorV0 collector = getCollector(lang);
 
         CompletableFuture<ReportDto> reportDto = CompletableFuture.runAsync(
                 () -> collector.add(taskId, solutionId, userId, code),
                 submitExecutor
         ).thenApplyAsync(
-                voidResult -> reportGenerator
-                        .generatePrivateReport(taskId, solutionId, userId, lang, code),
+                voidResult -> reportGenerator.generatePrivateReport(taskId, solutionId, userId, lang, code),
                 reportExecutor
         );
 
@@ -89,15 +77,24 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
 
     @Override
     public void addIgnored(SolutionIgnoreRequest request) {
-        TaskCollectorV0 collector = collectors.get(request.lang().getName());
+        TaskCollectorV0 collector = getCollector(request.lang());
 
-        if (collector == null) {
-            throw new IllegalArgumentException("Unsupported language");
-        }
-
+        // TODO проверить необходимость этих Executor
         submitExecutor.execute(() ->
                 collector.addIgnored(request.taskId(), request.program())
         );
     }
 
+    private TaskCollectorV0 getCollector(Language lang) {
+        TaskCollectorV0 collector = collectors.get(lang);
+
+        if (collector == null) {
+            throw new IllegalArgumentException("Unsupported language");
+        }
+        return collector;
+    }
+
+    private boolean isThresholdIncorrect(float threshold) {
+        return threshold < 0 || threshold > 100;
+    }
 }

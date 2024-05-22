@@ -1,9 +1,17 @@
 server:
-  port: 8085
+  port: ${PORT:8085}
 
 file-tracker:
-  path:
-#  path: D:/chesh/andrey/polytech/технополис/проект/anticheat_sample_solutions
+  path: ${FILE_TRACKER_PATH}
+
+executor:
+  keep-alive-in-seconds: 3
+
+  queue:
+    max-capacity: 1000
+
+  processors:
+    cpu-threads-count: ${CPU_THREADS_COUNT}
 
 spring:
   mvc:

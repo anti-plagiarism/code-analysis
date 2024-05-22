@@ -27,11 +27,7 @@ public class SolutionController {
             @RequestBody @Parameter(description = "Параметр для предоставления пользовательских решений")
             SolutionPutRequest request
     ) {
-        distributorService.put(request.taskId(),
-                request.solutionId(),
-                request.userId(),
-                request.lang().getName(),
-                request.program());
+        distributorService.put(request);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -39,7 +35,7 @@ public class SolutionController {
     @Operation(summary = "Игнорировать решение", description = "Позволяет игнорировать пользовательское решение")
     public ResponseEntity<String> ignoreSolution(
             @RequestBody @Parameter(description = "Параметр для игнорирования пользовательских решений")
-                SolutionIgnoreRequest request
+            SolutionIgnoreRequest request
     ) {
         distributorService.addIgnored(request);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);

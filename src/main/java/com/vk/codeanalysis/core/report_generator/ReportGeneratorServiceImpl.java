@@ -1,6 +1,7 @@
 package com.vk.codeanalysis.core.report_generator;
 
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
+import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.dto.report.SimilarityIntervalDto;
 import com.vk.codeanalysis.dto.report.ReportDto;
@@ -22,7 +23,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ReportGeneratorServiceImpl implements ReportGeneratorService {
 
-    private final Map<String, TaskCollectorV0> collectors;
+    private final Map<Language, TaskCollectorV0> collectors;
 
     @Override
     public ReportDto generateGeneralReport(
@@ -30,12 +31,11 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
             float thresholdEnd,
             Set<Long> tasks,
             Set<Long> users,
-            Set<String> langs
+            Set<Language> langs
     ) {
-        ReportDto reportDto = new ReportDto();
-        Map<String, List<SimilarityDto>> bodyMap = new HashMap<>();
+        Map<Language, List<SimilarityDto>> bodyMap = new HashMap<>();
         for (var collectorEntry : collectors.entrySet()) {
-            String language = collectorEntry.getKey();
+            Language language = collectorEntry.getKey();
 
             if (langs != null && !langs.contains(language)) {
                 continue;
@@ -79,33 +79,34 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                         boolean isInInterval = checkThresholdInterval(similarity, thresholdStart, thresholdEnd);
                         if (isInInterval) {
                             similarityList.add(
-                                    new SimilarityDto(
-                                            taskId,
-                                            userBaseId,
-                                            baseSolutionId,
-                                            userCurrId,
-                                            currSolutionId,
-                                            similarity
-                                    )
+                                    SimilarityDto.builder()
+                                            .taskId(taskId)
+                                            .solutionSrcId(baseSolutionId)
+                                            .solutionTargetId(userCurrId)
+                                            .userSrcId(userBaseId)
+                                            .userTargetId(currSolutionId)
+                                            .matchesPercentage(similarity)
+                                            .build()
                             );
                         }
+
                     }
                 }
             }
             bodyMap.put(language, similarityList);
         }
 
-        reportDto.setInterval(new SimilarityIntervalDto(thresholdStart, thresholdEnd));
-        reportDto.setTasks(tasks);
-        reportDto.setUsers(users);
-        reportDto.setLanguages(langs);
-        reportDto.setBody(bodyMap);
-
-        return reportDto;
+        return ReportDto.builder()
+                .interval(new SimilarityIntervalDto(thresholdStart, thresholdEnd))
+                .tasks(tasks)
+                .users(users)
+                .languages(langs)
+                .body(bodyMap)
+                .build();
     }
 
     @Override
-    public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, String lang, String code) {
+    public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, Language lang, String code) {
         // TODO
         return null;
     }

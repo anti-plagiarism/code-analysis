@@ -1,6 +1,7 @@
 package com.vk.codeanalysis.public_interface.report_generator;
 
 import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.public_interface.tokenizer.Language;
 
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public interface ReportGeneratorService {
             float thresholdEnd,
             Set<Long> tasks,
             Set<Long> users,
-            Set<String> langs);
+            Set<Language> langs);
 
     /**
      * Метод генерации частного отчета.
@@ -35,6 +36,6 @@ public interface ReportGeneratorService {
             long taskId,
             long solutionId,
             long userId,
-            String lang,
+            Language lang,
             String code);
 }

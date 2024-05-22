@@ -2,6 +2,8 @@ package com.vk.codeanalysis.public_interface.distributor;
 
 import com.vk.codeanalysis.dto.request.SolutionIgnoreRequest;
 import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.dto.request.SolutionPutRequest;
+import com.vk.codeanalysis.public_interface.tokenizer.Language;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -11,13 +13,9 @@ public interface DistributorServiceV0 {
     /**
      * Метод для загрузки файлов пользователей в систему антиплагиата
      * для последующего анализа.
-     * @param taskId
-     * @param solutionId
-     * @param userId
-     * @param lang
-     * @param code
+     * @param request Параметр для предоставления пользовательских решений
      */
-    void put(long taskId, long solutionId, long userId, String lang, String code);
+    void put(SolutionPutRequest request);
 
     /**
      * Получение отчёта, в котором будут находиться все решения,
@@ -35,7 +33,7 @@ public interface DistributorServiceV0 {
             float thresholdEnd,
             Set<Long> tasks,
             Set<Long> users,
-            Set<String> langs);
+            Set<Language> langs);
 
     /**
      * Получение частного отчёта
@@ -44,18 +42,18 @@ public interface DistributorServiceV0 {
      * @param userId ID пользователя
      * @param lang язык программирования
      * @param code решение
-     * @return
+     * @return Полученный отчёт
      */
     CompletableFuture<ReportDto> getPrivateReport(
             long taskId,
             long solutionId,
             long userId,
-            String lang,
+            Language lang,
             String code);
 
     /**
-     *
-     * @param request
+     *  Добавление решений, которые не следует считать плагиатом
+     * @param request данные для загрузки игнорируемового решения
      */
     void addIgnored(SolutionIgnoreRequest request);
 }

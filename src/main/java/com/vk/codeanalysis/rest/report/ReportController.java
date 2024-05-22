@@ -2,6 +2,7 @@ package com.vk.codeanalysis.rest.report;
 
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 public class ReportController {
     private final DistributorServiceV0 distributorService;
 
-    @GetMapping("/md/")
+    @GetMapping("/md")
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решениям")
@@ -41,13 +42,13 @@ public class ReportController {
             Set<Long> userList,
             @RequestParam(name = "langs", required = false)
             @Parameter(description = "Список языков программирования")
-            Set<String> langList
+            Set<Language> langList
     ) {
         // TODO
         return null;
     }
 
-    @GetMapping("/json/")
+    @GetMapping("/json")
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решениям")
@@ -67,21 +68,20 @@ public class ReportController {
             Set<Long> users,
             @RequestParam(name = "langs", required = false)
             @Parameter(description = "Список языков программирования")
-            Set<String> langs
+            Set<Language> langs
     ) {
-
-        return distributorService
-                .getGeneralReport(similarityThresholdStart,
-                        similarityThresholdEnd,
-                        tasks,
-                        users,
-                        langs);
+        return distributorService.getGeneralReport(
+                similarityThresholdStart,
+                similarityThresholdEnd,
+                tasks,
+                users,
+                langs);
     }
 
-    @GetMapping("/private/md/")
+    @GetMapping("/private/md")
     @Operation(
-            summary = "Получить отчет",
-            description = "Предоставляет отчёт по решению в формате MD")
+            summary = "Получить отчет по одному пользовательскому коду",
+            description = "Предоставляет отчёт по одному пользовательскому решению в формате MD")
     @Async
     public CompletableFuture<String> getPrivateMdReport(
             @RequestParam(name = "task_id")
@@ -94,20 +94,20 @@ public class ReportController {
             @Parameter(description = "ID пользователя")
             long userId,
             @RequestParam(name = "lang")
-            @Parameter(description = "Список языков")
-            String lang,
+            @Parameter(description = "Язык программирования", example = "CPP")
+            Language lang,
             @RequestParam(name = "code")
-            @Parameter(description = "Список языков программирования")
+            @Parameter(description = "Пользовательская программа")
             String code
     ) {
         // TODO
         return null;
     }
 
-    @GetMapping("/private/json/")
+    @GetMapping("/private/json")
     @Operation(
-            summary = "Получить отчет",
-            description = "Предоставляет отчёт по решению в формате JSON")
+            summary = "Получить отчет по конкретному пользовательскому решению",
+            description = "Предоставляет отчёт по одному пользовательскому решению в формате JSON")
     @Async
     public CompletableFuture<ReportDto> getPrivateJsonReport(
             @RequestParam(name = "task_id")
@@ -120,18 +120,17 @@ public class ReportController {
             @Parameter(description = "ID пользователя")
             long userId,
             @RequestParam(name = "lang")
-            @Parameter(description = "Список языков")
-            String lang,
+            @Parameter(description = "Язык программирования", example = "CPP")
+            Language lang,
             @RequestParam(name = "code")
-            @Parameter(description = "Список языков программирования")
+            @Parameter(description = "Пользовательская программа")
             String code
     ) {
-
-        return distributorService
-                .getPrivateReport(taskId,
-                        solutionId,
-                        userId,
-                        lang,
-                        code);
+        return distributorService.getPrivateReport(
+                taskId,
+                solutionId,
+                userId,
+                lang,
+                code);
     }
 }

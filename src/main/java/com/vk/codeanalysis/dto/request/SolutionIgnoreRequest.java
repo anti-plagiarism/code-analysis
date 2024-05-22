@@ -9,7 +9,7 @@ public record SolutionIgnoreRequest (
     @Schema(description = "Идентификатор задания", example = "1")
     @JsonProperty(value = "task_id")
     Long taskId,
-    @Schema(description = "Язык программирования, на котором написана программа", example = "java")
+    @Schema(description = "Язык программирования, на котором написана программа", example = "JAVA")
     Language lang,
     @Schema(description = "Текст программы")
     String program
