@@ -85,4 +85,19 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
 
         return reportDto;
     }
+
+    @Override
+    public void addIgnored(SolutionIgnoreRequest request) {
+        TaskCollectorV1 collector = collectors.get(request.lang());
+
+        if (collector == null) {
+            throw new IllegalArgumentException("Unsupported language");
+        }
+
+        executor.execute(() ->
+                collector.addIgnored(request.taskId(), request.program())
+        );
+    }
+
+
 }

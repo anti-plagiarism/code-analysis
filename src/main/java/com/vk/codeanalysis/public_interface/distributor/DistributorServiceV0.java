@@ -51,4 +51,5 @@ public interface DistributorServiceV0 {
             long userId,
             String lang,
             String code);
+    void addIgnored(SolutionIgnoreRequest request);
 }

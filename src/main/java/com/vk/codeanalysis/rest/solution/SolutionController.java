@@ -1,6 +1,7 @@
 package com.vk.codeanalysis.rest.solution;
 
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
+import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
 import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,5 +33,15 @@ public class SolutionController {
                 request.lang().getName(),
                 request.program());
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PutMapping("/ignore")
+    @Operation(summary = "Игнорировать решение", description = "Позволяет игнорировать пользовательское решение")
+    public ResponseEntity<String> ignoreSolution(
+            @RequestBody @Parameter(description = "Параметр для игнорирования пользовательских решений")
+                SolutionIgnoreRequest request
+    ) {
+        distributorService.addIgnored(request);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }

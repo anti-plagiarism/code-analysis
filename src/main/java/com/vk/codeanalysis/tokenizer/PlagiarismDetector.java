@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +20,13 @@ public class PlagiarismDetector {
     private final Fingerprinter fingerprinter;
     private final Map<Integer, Set<Long>> fingerprintBase = new HashMap<>();
     private final Map<Long, CollisionReport> reports = new HashMap<>();
+    private final Set<Integer> ignoredFingerprints = new HashSet<>();
+
+    // UserId <--> List<SolutionId>
+    private final Map<Long, List<Long>> submittedSolutions = new HashMap<>();
+    // SolutionId <--> UserId
+    private final Map<Long, Long> solutionToUser = new HashMap<>();
+
 
     // UserId <--> List<SolutionId>
     private final Map<Long, List<Long>> submittedSolutions = new HashMap<>();
@@ -43,6 +51,10 @@ public class PlagiarismDetector {
             int fingerprint = fingerprints.next();
             collisionReport.addFingerprint();
 
+            if (ignoredFingerprints.contains(fingerprint)) {
+                continue;
+            }
+
             Set<Long> files = (fingerprintBase.containsKey(fingerprint))
                     ? fingerprintBase.get(fingerprint)
                     : new HashSet<>();
@@ -59,5 +71,13 @@ public class PlagiarismDetector {
         }
 
         reports.put(solutionId, collisionReport);
+    }
+
+    public void addIgnoredFile(String file) {
+        Iterator<Integer> fingerprints = fingerprinter.getFingerprints(file, WINNOW_LENGTH);
+        while (fingerprints.hasNext()) {
+            int fingerprint = fingerprints.next();
+            ignoredFingerprints.add(fingerprint);
+        }
     }
 }
