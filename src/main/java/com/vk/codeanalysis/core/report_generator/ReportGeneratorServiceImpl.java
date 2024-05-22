@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +107,52 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
 
     @Override
     public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, String lang, String code) {
-        // TODO
-        return null;
+
+        ReportDto reportDto = new ReportDto();
+        Map<String, List<SimilarityDto>> bodyMap = new HashMap<>();
+        List<SimilarityDto> similarityList = new ArrayList<>();
+
+        TaskCollectorV0 collector = collectors.get(lang);
+        PlagiarismDetector detector = collector.getDetectors().get(taskId);
+
+        Map<Long, List<Long>> submittedSolutions = detector.getSubmittedSolutions();
+        Map<Long, Long> solutionToUser = detector.getSolutionToUser();
+
+        CollisionReport report = detector.getReports().get(solutionId);
+        int totalFingerprints = report.getTotalFingerprints();
+
+        for (Map.Entry<Long, Integer> collisionEntry : report.getCollisions().entrySet()) {
+            long currSolutionId = collisionEntry.getKey();
+            long userCurrId = solutionToUser.get(currSolutionId);
+
+            if (submittedSolutions.get(userCurrId).getLast() != currSolutionId) {
+                // Игнорируем не последнее решение.
+                continue;
+            }
+
+            float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
+
+            similarityList.add(
+                    new SimilarityDto(
+                            taskId,
+                            userId,
+                            solutionId,
+                            userCurrId,
+                            currSolutionId,
+                            similarity
+                    )
+            );
+
+        }
+
+        reportDto.setTasks(Collections.singleton(taskId));
+        reportDto.setUsers(Collections.singleton(userId));
+        reportDto.setLanguages(Collections.singleton(lang));
+        reportDto.setBody(bodyMap);
+
+        bodyMap.put(lang, similarityList);
+
+        return reportDto;
     }
 
     private static boolean checkThresholdInterval(float value, float start, float end) {

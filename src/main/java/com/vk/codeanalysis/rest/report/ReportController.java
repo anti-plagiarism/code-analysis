@@ -1,5 +1,6 @@
 package com.vk.codeanalysis.rest.report;
 
+import com.vk.codeanalysis.dto.request.PrivateReportGetRequest;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.dto.report.ReportDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -84,21 +86,8 @@ public class ReportController {
             description = "Предоставляет отчёт по решению в формате MD")
     @Async
     public CompletableFuture<String> getPrivateMdReport(
-            @RequestParam(name = "task_id")
-            @Parameter(description = "ID задачи")
-            long taskId,
-            @RequestParam(name = "solution_id")
-            @Parameter(description = "ID решения")
-            long solutionId,
-            @RequestParam(name = "user_id")
-            @Parameter(description = "ID пользователя")
-            long userId,
-            @RequestParam(name = "lang")
-            @Parameter(description = "Список языков")
-            String lang,
-            @RequestParam(name = "code")
-            @Parameter(description = "Список языков программирования")
-            String code
+            @RequestBody
+            PrivateReportGetRequest request
     ) {
         // TODO
         return null;
@@ -110,28 +99,15 @@ public class ReportController {
             description = "Предоставляет отчёт по решению в формате JSON")
     @Async
     public CompletableFuture<ReportDto> getPrivateJsonReport(
-            @RequestParam(name = "task_id")
-            @Parameter(description = "ID задачи")
-            long taskId,
-            @RequestParam(name = "solution_id")
-            @Parameter(description = "ID решения")
-            long solutionId,
-            @RequestParam(name = "user_id")
-            @Parameter(description = "ID пользователя")
-            long userId,
-            @RequestParam(name = "lang")
-            @Parameter(description = "Список языков")
-            String lang,
-            @RequestParam(name = "code")
-            @Parameter(description = "Список языков программирования")
-            String code
+            @RequestBody
+            PrivateReportGetRequest request
     ) {
 
         return distributorService
-                .getPrivateReport(taskId,
-                        solutionId,
-                        userId,
-                        lang,
-                        code);
+                .getPrivateReport(request.taskId(),
+                        request.solutionId(),
+                        request.userId(),
+                        request.lang(),
+                        request.code());
     }
 }
