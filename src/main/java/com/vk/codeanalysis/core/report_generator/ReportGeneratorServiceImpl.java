@@ -1,7 +1,6 @@
 package com.vk.codeanalysis.core.report_generator;
 
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
-import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.report_dto.SimilarityIntervalDto;
 import com.vk.codeanalysis.report_dto.ReportDto;
