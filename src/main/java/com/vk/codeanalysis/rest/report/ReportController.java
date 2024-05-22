@@ -1,6 +1,7 @@
 package com.vk.codeanalysis.rest.report;
 
 import com.vk.codeanalysis.dto.request.PrivateReportGetRequest;
+import com.vk.codeanalysis.dto.request.ReportGetRequest;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.dto.report.ReportDto;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @RestController
@@ -28,6 +28,7 @@ public class ReportController {
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решениям")
+    @Async
     public CompletableFuture<String> getMdReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
             @Parameter(description = "Нижний порог сходства")
@@ -35,15 +36,8 @@ public class ReportController {
             @RequestParam(name = "similarity_threshold_end", defaultValue = "100")
             @Parameter(description = "Верхний порог сходства")
             float similarityThresholdEnd,
-            @RequestParam(name = "tasks", required = false)
-            @Parameter(description = "Список идентификаторов задач")
-            Set<Long> taskList,
-            @RequestParam(name = "users", required = false)
-            @Parameter(description = "Список идентификаторов пользователей")
-            Set<Long> userList,
-            @RequestParam(name = "langs", required = false)
-            @Parameter(description = "Список языков программирования")
-            Set<String> langList
+            @RequestBody
+            ReportGetRequest request
     ) {
         // TODO
         return null;
@@ -61,26 +55,19 @@ public class ReportController {
             @RequestParam(name = "similarity_threshold_end", defaultValue = "100")
             @Parameter(description = "Верхний порог сходства решений")
             float similarityThresholdEnd,
-            @RequestParam(name = "tasks", required = false)
-            @Parameter(description = "Список идентификаторов задач")
-            Set<Long> tasks,
-            @RequestParam(name = "users", required = false)
-            @Parameter(description = "Список идентификаторов пользователей")
-            Set<Long> users,
-            @RequestParam(name = "langs", required = false)
-            @Parameter(description = "Список языков программирования")
-            Set<String> langs
+            @RequestBody
+            ReportGetRequest request
     ) {
 
         return distributorService
                 .getGeneralReport(similarityThresholdStart,
                         similarityThresholdEnd,
-                        tasks,
-                        users,
-                        langs);
+                        request.tasks(),
+                        request.users(),
+                        request.langs());
     }
 
-    @GetMapping("/private/md/")
+    @GetMapping("/private/md")
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решению в формате MD")
@@ -93,7 +80,7 @@ public class ReportController {
         return null;
     }
 
-    @GetMapping("/private/json/")
+    @GetMapping("/private/json")
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решению в формате JSON")

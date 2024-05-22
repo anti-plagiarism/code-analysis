@@ -38,7 +38,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
         for (var collectorEntry : collectors.entrySet()) {
             String language = collectorEntry.getKey();
 
-            if (langs != null && !langs.contains(language)) {
+            if (langs != null && !langs.isEmpty() && !langs.contains(language)) {
                 continue;
             }
 
@@ -48,7 +48,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                 Map<Long, Long> solutionToUser = detectorsEntry.getValue().getSolutionToUser();
                 long taskId = detectorsEntry.getKey();
 
-                if (tasks != null && !tasks.contains(taskId)) {
+                if (tasks != null && !tasks.isEmpty() && !tasks.contains(taskId)) {
                     continue;
                 }
 
@@ -67,7 +67,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                         long currSolutionId = collisionEntry.getKey();
                         long userCurrId = solutionToUser.get(currSolutionId);
 
-                        if (users != null
+                        if (users != null && !users.isEmpty()
                                 && (!users.contains(userBaseId) || !users.contains(userCurrId))) {
                             continue;
                         }
@@ -103,6 +103,10 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
         reportDto.setBody(bodyMap);
 
         return reportDto;
+    }
+
+    private static boolean checkThresholdInterval(float value, float start, float end) {
+        return value >= start && value <= end;
     }
 
     @Override
@@ -153,10 +157,6 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
         bodyMap.put(lang, similarityList);
 
         return reportDto;
-    }
-
-    private static boolean checkThresholdInterval(float value, float start, float end) {
-        return value >= start && value <= end;
     }
 
 }
