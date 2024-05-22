@@ -78,7 +78,7 @@ public class ReportController {
                         langs);
     }
 
-    @GetMapping("/private/md")
+    @GetMapping("/private/md/")
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решению в формате MD")
@@ -104,7 +104,7 @@ public class ReportController {
         return null;
     }
 
-    @GetMapping("/private/json")
+    @GetMapping("/private/json/")
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решению в формате JSON")

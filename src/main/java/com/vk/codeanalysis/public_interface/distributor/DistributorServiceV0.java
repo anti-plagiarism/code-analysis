@@ -1,5 +1,6 @@
 package com.vk.codeanalysis.public_interface.distributor;
 
+import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
 import com.vk.codeanalysis.report_dto.ReportDto;
 
 import java.util.Set;
@@ -51,5 +52,10 @@ public interface DistributorServiceV0 {
             long userId,
             String lang,
             String code);
+
+    /**
+     *
+     * @param request
+     */
     void addIgnored(SolutionIgnoreRequest request);
 }
