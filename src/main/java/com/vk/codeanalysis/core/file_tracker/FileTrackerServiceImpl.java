@@ -25,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 @RequiredArgsConstructor
 public class FileTrackerServiceImpl implements FileTrackerService {
 
-    private final ExecutorService executor;
+    private final ExecutorService trackerExecutor;
     private final DistributorServiceV0 distributorService;
 
     @Value("${file-tracker.path}")
@@ -35,7 +35,7 @@ public class FileTrackerServiceImpl implements FileTrackerService {
     @Override
     public void trackSolutions() {
         Path rootPath = Path.of(trackPath);
-        executor.execute(() -> {
+        trackerExecutor.execute(() -> {
             try {
                 Map<Long, SolutionPutRequest> latestSolutions = new HashMap<>();
                 Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
@@ -54,7 +54,15 @@ public class FileTrackerServiceImpl implements FileTrackerService {
                     }
                 });
 
-                latestSolutions.values().forEach(distributorService::put);
+                latestSolutions
+                        .values()
+                        .forEach(
+                                (request) ->
+                                        distributorService.put(request.taskId(),
+                                                request.solutionId(),
+                                                request.userId(),
+                                                request.lang().getName(),
+                                                request.program()));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

@@ -26,7 +26,11 @@ public class SolutionController {
             @RequestBody @Parameter(description = "Параметр для предоставления пользовательских решений")
             SolutionPutRequest request
     ) {
-        distributorService.put(request);
+        distributorService.put(request.taskId(),
+                request.solutionId(),
+                request.userId(),
+                request.lang().getName(),
+                request.program());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

@@ -23,66 +23,69 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class ReportGeneratorServiceImpl implements ReportGeneratorService {
 
-    private final Map<Language, TaskCollectorV0> collectors;
+    private final Map<String, TaskCollectorV0> collectors;
 
     @Override
-    public ReportDto generateReport(
+    public ReportDto generateGeneralReport(
             float thresholdStart,
             float thresholdEnd,
             Set<Long> tasks,
             Set<Long> users,
             Set<String> langs
     ) {
-
         ReportDto reportDto = new ReportDto();
         Map<String, List<SimilarityDto>> bodyMap = new HashMap<>();
-
         for (var collectorEntry : collectors.entrySet()) {
+            String language = collectorEntry.getKey();
 
-            String language = collectorEntry.getKey().getName();
+            if (langs != null && !langs.contains(language)) {
+                continue;
+            }
+
             List<SimilarityDto> similarityList = new ArrayList<>();
-
             for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
-
                 Map<Long, List<Long>> submittedSolutions = detectorsEntry.getValue().getSubmittedSolutions();
                 Map<Long, Long> solutionToUser = detectorsEntry.getValue().getSolutionToUser();
-
                 long taskId = detectorsEntry.getKey();
 
+                if (tasks != null && !tasks.contains(taskId)) {
+                    continue;
+                }
+
                 for (Map.Entry<Long, CollisionReport> reportsEntry : detectorsEntry.getValue().getReports().entrySet()) {
+                    long baseSolutionId = reportsEntry.getKey();
+                    long userBaseId = solutionToUser.get(baseSolutionId);
+                    long lastSolutionId = submittedSolutions.get(userBaseId).getLast();
 
-                    long baseId = reportsEntry.getKey();
-
-                    long userBaseSolution = solutionToUser.get(baseId);
-                    long lastSolutionId = submittedSolutions.get(userBaseSolution).getLast();
-
-                    if (baseId != lastSolutionId) {
+                    // Ignore the self-intersection.
+                    if (baseSolutionId != lastSolutionId) {
                         continue;
                     }
 
                     int totalFingerprints = reportsEntry.getValue().getTotalFingerprints();
                     for (Map.Entry<Long, Integer> collisionEntry : reportsEntry.getValue().getCollisions().entrySet()) {
+                        long currSolutionId = collisionEntry.getKey();
+                        long userCurrId = solutionToUser.get(currSolutionId);
 
-                        long currId = collisionEntry.getKey();
-
-                        long userCurrSolution = solutionToUser.get(currId);
-                        lastSolutionId = submittedSolutions.get(userCurrSolution).getLast();
-
-                        if (currId != lastSolutionId) {
+                        if (users != null
+                                && (!users.contains(userBaseId) || !users.contains(userCurrId))) {
                             continue;
                         }
 
+                        lastSolutionId = submittedSolutions.get(userCurrId).getLast();
+                        if (currSolutionId != lastSolutionId) {
+                            continue;
+                        }
                         float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
                         boolean isInInterval = checkThresholdInterval(similarity, thresholdStart, thresholdEnd);
-
                         if (isInInterval) {
                             similarityList.add(
                                     new SimilarityDto(
                                             taskId,
-                                            userBaseSolution,
-                                            baseId,
-                                            userCurrSolution,
-                                            currId,
+                                            userBaseId,
+                                            baseSolutionId,
+                                            userCurrId,
+                                            currSolutionId,
                                             similarity
                                     )
                             );
@@ -90,7 +93,6 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                     }
                 }
             }
-
             bodyMap.put(language, similarityList);
         }
 
@@ -101,6 +103,12 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
         reportDto.setBody(bodyMap);
 
         return reportDto;
+    }
+
+    @Override
+    public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, String lang, String code) {
+        // TODO
+        return null;
     }
 
     private static boolean checkThresholdInterval(float value, float start, float end) {

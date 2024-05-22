@@ -22,7 +22,7 @@ public class DistributorServiceConfig {
     private static final int MAX_CAPACITY = 1000;
 
     @Bean
-    public ExecutorService executor() {
+    public ExecutorService submitExecutor() {
         return new ThreadPoolExecutor(
                 CPU_THREADS_COUNT,
                 CPU_THREADS_COUNT,
@@ -34,11 +34,23 @@ public class DistributorServiceConfig {
     }
 
     @Bean
-    public Map<Language, TaskCollectorV0> collectors() {
+    public ExecutorService reportExecutor() {
+        return new ThreadPoolExecutor(
+                CPU_THREADS_COUNT,
+                CPU_THREADS_COUNT,
+                KEEP_ALIVE_SECONDS,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(MAX_CAPACITY),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
+    }
+
+    @Bean
+    public Map<String, TaskCollectorV0> collectors() {
         return Map.of(
-                Language.JAVA, new TaskCollectorImpl(new TreeSitterJava()),
-                Language.CPP, new TaskCollectorImpl(new TreeSitterCpp()),
-                Language.PYTHON, new TaskCollectorImpl(new TreeSitterPython())
+                Language.JAVA.getName(), new TaskCollectorImpl(new TreeSitterJava()),
+                Language.CPP.getName(), new TaskCollectorImpl(new TreeSitterCpp()),
+                Language.PYTHON.getName(), new TaskCollectorImpl(new TreeSitterPython())
         );
     }
 }
