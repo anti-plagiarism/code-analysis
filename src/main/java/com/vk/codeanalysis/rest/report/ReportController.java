@@ -1,7 +1,7 @@
 package com.vk.codeanalysis.rest.report;
 
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.report_dto.ReportDto;
+import com.vk.codeanalysis.dto.report.ReportDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

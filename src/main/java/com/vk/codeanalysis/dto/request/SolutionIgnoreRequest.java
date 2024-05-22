@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.public_interface.dto;
+package com.vk.codeanalysis.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;

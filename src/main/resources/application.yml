@@ -2,8 +2,8 @@ server:
   port: 8085
 
 file-tracker:
-#  path:
-  path: D:/chesh/andrey/polytech/технополис/проект/anticheat_sample_solutions
+  path:
+#  path: D:/chesh/andrey/polytech/технополис/проект/anticheat_sample_solutions
 
 spring:
   mvc:

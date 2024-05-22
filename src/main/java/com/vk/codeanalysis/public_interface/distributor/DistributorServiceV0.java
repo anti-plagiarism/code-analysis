@@ -1,7 +1,7 @@
 package com.vk.codeanalysis.public_interface.distributor;
 
-import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
-import com.vk.codeanalysis.report_dto.ReportDto;
+import com.vk.codeanalysis.dto.request.SolutionIgnoreRequest;
+import com.vk.codeanalysis.dto.report.ReportDto;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;

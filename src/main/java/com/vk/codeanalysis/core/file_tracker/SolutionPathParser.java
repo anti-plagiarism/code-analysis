@@ -1,6 +1,6 @@
 package com.vk.codeanalysis.core.file_tracker;
 
-import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
+import com.vk.codeanalysis.dto.request.SolutionPutRequest;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import lombok.extern.slf4j.Slf4j;
 

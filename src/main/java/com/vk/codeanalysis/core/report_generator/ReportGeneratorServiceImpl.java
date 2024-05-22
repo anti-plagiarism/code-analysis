@@ -2,9 +2,9 @@ package com.vk.codeanalysis.core.report_generator;
 
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
-import com.vk.codeanalysis.report_dto.SimilarityIntervalDto;
-import com.vk.codeanalysis.report_dto.ReportDto;
-import com.vk.codeanalysis.report_dto.SimilarityDto;
+import com.vk.codeanalysis.dto.report.SimilarityIntervalDto;
+import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.dto.report.SimilarityDto;
 import com.vk.codeanalysis.tokenizer.CollisionReport;
 import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
 import lombok.RequiredArgsConstructor;

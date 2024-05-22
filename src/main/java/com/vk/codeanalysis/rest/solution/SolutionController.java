@@ -1,8 +1,8 @@
 package com.vk.codeanalysis.rest.solution;
 
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
-import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
+import com.vk.codeanalysis.dto.request.SolutionIgnoreRequest;
+import com.vk.codeanalysis.dto.request.SolutionPutRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;

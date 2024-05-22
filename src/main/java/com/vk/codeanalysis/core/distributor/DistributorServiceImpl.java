@@ -1,10 +1,10 @@
 package com.vk.codeanalysis.core.distributor;
 
-import com.vk.codeanalysis.public_interface.dto.SolutionIgnoreRequest;
+import com.vk.codeanalysis.dto.request.SolutionIgnoreRequest;
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.report_dto.ReportDto;
+import com.vk.codeanalysis.dto.report.ReportDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

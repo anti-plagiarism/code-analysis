@@ -1,4 +1,4 @@
-package com.vk.codeanalysis.report_dto;
+package com.vk.codeanalysis.dto.report;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

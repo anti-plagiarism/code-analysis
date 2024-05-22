@@ -1,7 +1,7 @@
 package com.vk.codeanalysis.core.file_tracker;
 
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
+import com.vk.codeanalysis.dto.request.SolutionPutRequest;
 import com.vk.codeanalysis.public_interface.file_tracker.FileTrackerService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
