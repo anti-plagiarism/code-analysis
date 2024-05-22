@@ -19,12 +19,12 @@ import java.util.Set;
 public class ReportDto {
     @Schema(description = "Интервал схожести решений")
     private SimilarityIntervalDto interval;
-    @Schema(description = "Значения для ID заданий")
+    @Schema(description = "Значения для идентификаторов заданий")
     private Set<Long> tasks;
-    @Schema(description = "Значения для ID пользователей")
+    @Schema(description = "Значения для идентификаторов пользователей")
     private Set<Long> users;
     @Schema(description = "Значения для языков программирования")
     private Set<Language> languages;
-    @Schema(description = "Мапа, которая хранит совпадения по пользовательским решениям сгруппированные по языкам")
+    @Schema(description = "Мапа для хранения совпадений по пользовательским решениям, сгруппированным по языкам")
     private Map<Language, List<SimilarityDto>> body;
 }

@@ -26,7 +26,7 @@ public interface DistributorServiceV0 {
      * @param tasks список задач
      * @param users список пользователей
      * @param langs список языков программирования
-     * @return Отчёт в строковом представлении
+     * @return Отчёт в формате json
      */
     CompletableFuture<ReportDto> getGeneralReport(
             float thresholdStart,
@@ -42,7 +42,7 @@ public interface DistributorServiceV0 {
      * @param userId ID пользователя
      * @param lang язык программирования
      * @param code решение
-     * @return Полученный отчёт
+     * @return Отчёт в формате json
      */
     CompletableFuture<ReportDto> getPrivateReport(
             long taskId,
@@ -53,7 +53,7 @@ public interface DistributorServiceV0 {
 
     /**
      *  Добавление решений, которые не следует считать плагиатом
-     * @param request данные для загрузки игнорируемового решения
+     * @param request Данные для загрузки игнорируемового решения
      */
     void addIgnored(SolutionIgnoreRequest request);
 }

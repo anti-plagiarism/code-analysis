@@ -17,7 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v0/solutions")
 @RequiredArgsConstructor
-@Tag(name = "Контролер решений", description = "Позволяет загружать пользовательские решения для последующей проверки на антиплагиат")
+@Tag(
+        name = "Контролер решений",
+        description = "Позволяет загружать решения для проверки на антиплагиат" +
+                "или загружать авторские решения, чтобы избагать неоправданной блокировки"
+)
 public class SolutionController {
     private final DistributorServiceV0 distributorService;
 
@@ -32,7 +36,7 @@ public class SolutionController {
     }
 
     @PutMapping("/ignore")
-    @Operation(summary = "Игнорировать решение", description = "Позволяет игнорировать пользовательское решение")
+    @Operation(summary = "Игнорировать решение", description = "Позволяет игнорировать решения, которые автор задачи не считает сплагиаченными")
     public ResponseEntity<String> ignoreSolution(
             @RequestBody @Parameter(description = "Параметр для игнорирования пользовательских решений")
             SolutionIgnoreRequest request

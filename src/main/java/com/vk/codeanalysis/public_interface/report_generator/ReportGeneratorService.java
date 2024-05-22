@@ -14,7 +14,7 @@ public interface ReportGeneratorService {
      * @param tasks Список задач (учитывается если не равен null)
      * @param users Список пользователей (учитывается если не равен null)
      * @param langs Список языков (учитывается если не равен null)
-     * @return ReportDto
+     * @return ReportDto отчёт в формате json
      */
     ReportDto generateGeneralReport(
             float thresholdStart,
@@ -30,7 +30,7 @@ public interface ReportGeneratorService {
      * @param userId ID пользователя
      * @param lang Язык программирования
      * @param code Само решение
-     * @return ReportDto
+     * @return ReportDto отчёт в формате json
      */
     ReportDto generatePrivateReport(
             long taskId,

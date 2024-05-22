@@ -25,8 +25,8 @@ public class ReportController {
 
     @GetMapping("/md")
     @Operation(
-            summary = "Получить отчет",
-            description = "Предоставляет отчёт по решениям")
+            summary = "Получить отчет в формате MD",
+            description = "Предоставляет отчёт в формате MD по загруженным раннее решениям")
     public CompletableFuture<String> getMdReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
             @Parameter(description = "Нижний порог сходства")
@@ -50,8 +50,8 @@ public class ReportController {
 
     @GetMapping("/json")
     @Operation(
-            summary = "Получить отчет",
-            description = "Предоставляет отчёт по решениям")
+            summary = "Получить отчет в формате JSON",
+            description = "Предоставляет отчёт в формате JSON по загруженным раннее решениям")
     @Async
     public CompletableFuture<ReportDto> getJsonReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
@@ -67,7 +67,7 @@ public class ReportController {
             @Parameter(description = "Список идентификаторов пользователей")
             Set<Long> users,
             @RequestParam(name = "langs", required = false)
-            @Parameter(description = "Список языков программирования")
+            @Parameter(description = "Список языков программирования", example = "CPP,JAVA")
             Set<Language> langs
     ) {
         return distributorService.getGeneralReport(
@@ -80,24 +80,24 @@ public class ReportController {
 
     @GetMapping("/private/md")
     @Operation(
-            summary = "Получить отчет по одному пользовательскому коду",
-            description = "Предоставляет отчёт по одному пользовательскому решению в формате MD")
+            summary = "Получить отчет по конкретному решению",
+            description = "Предоставляет отчёт по конкретному пользовательскому решению в формате MD")
     @Async
     public CompletableFuture<String> getPrivateMdReport(
             @RequestParam(name = "task_id")
-            @Parameter(description = "ID задачи")
+            @Parameter(description = "Идентификатор задачи")
             long taskId,
             @RequestParam(name = "solution_id")
-            @Parameter(description = "ID решения")
+            @Parameter(description = "Идентификатор решения")
             long solutionId,
             @RequestParam(name = "user_id")
-            @Parameter(description = "ID пользователя")
+            @Parameter(description = "Идентификатор пользователя")
             long userId,
             @RequestParam(name = "lang")
             @Parameter(description = "Язык программирования", example = "CPP")
             Language lang,
             @RequestParam(name = "code")
-            @Parameter(description = "Пользовательская программа")
+            @Parameter(description = "Пользовательская программа", example = "CPP,JAVA")
             String code
     ) {
         // TODO
@@ -106,18 +106,18 @@ public class ReportController {
 
     @GetMapping("/private/json")
     @Operation(
-            summary = "Получить отчет по конкретному пользовательскому решению",
-            description = "Предоставляет отчёт по одному пользовательскому решению в формате JSON")
+            summary = "Получить отчет по конкретному решению",
+            description = "Предоставляет отчёт по конкретному пользовательскому решению в формате JSON")
     @Async
     public CompletableFuture<ReportDto> getPrivateJsonReport(
             @RequestParam(name = "task_id")
-            @Parameter(description = "ID задачи")
+            @Parameter(description = "Идентификатор задачи")
             long taskId,
             @RequestParam(name = "solution_id")
-            @Parameter(description = "ID решения")
+            @Parameter(description = "Идентификатор решения")
             long solutionId,
             @RequestParam(name = "user_id")
-            @Parameter(description = "ID пользователя")
+            @Parameter(description = "Идентификатор пользователя")
             long userId,
             @RequestParam(name = "lang")
             @Parameter(description = "Язык программирования", example = "CPP")

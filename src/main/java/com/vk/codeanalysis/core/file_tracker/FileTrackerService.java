@@ -22,16 +22,16 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
+@Service
 @RequiredArgsConstructor
-@Component
-public class FileTrackerServiceImpl {
+public class FileTrackerService {
     private final DistributorServiceV0 distributorService;
 
     @Value("${file-tracker.path}")
     private String trackPath;
 
     @PostConstruct
-    public void trackSolutions() {
+    private void trackSolutions() {
         Path rootPath = Path.of(trackPath);
         try {
             Map<Long, SolutionPutRequest> latestSolutions = new HashMap<>();

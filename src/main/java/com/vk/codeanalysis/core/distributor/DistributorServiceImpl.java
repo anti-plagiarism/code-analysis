@@ -29,12 +29,14 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
     public void put(SolutionPutRequest request) {
         TaskCollectorV0 collector = getCollector(request.lang());
         //TODO здесь executor генерировал исключения
-        collector.add(
-                request.taskId(),
-                request.solutionId(),
-                request.userId(),
-                request.program()
-        );
+        //submitExecutor.execute(() ->
+            collector.add(
+                    request.taskId(),
+                    request.solutionId(),
+                    request.userId(),
+                    request.program()
+            );
+        //);
     }
 
     @Override

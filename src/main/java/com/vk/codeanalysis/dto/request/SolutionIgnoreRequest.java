@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Сущность для добавления решения, данные из которого не должны считаться плагиатом")
+@Schema(description = "Сущность для игнорируемых решений, которые не считаются плагиатом")
 public record SolutionIgnoreRequest (
     @Schema(description = "Идентификатор задания", example = "1")
     @JsonProperty(value = "task_id")
