@@ -15,9 +15,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
-public final class PathUtils {
+public final class FileUtils {
 
-    private PathUtils() {
+    private FileUtils() {
 
     }
 
@@ -30,18 +30,12 @@ public final class PathUtils {
     }
 
     public static String normalizePath(Path path) {
-        String normalizedPath = path.toString();
-        if (File.separator.equals("\\")) {
-            normalizedPath = normalizedPath.replace("\\", "/");
-        } else if (File.separator.equals("/")) {
-            normalizedPath = normalizedPath.replace("/", "\\");
-        }
-        return normalizedPath;
+        return path.toString().replace("\\", "/");
     }
 
     public static String readProgramFromFile(Path solutionPath) {
         try (Stream<String> dataStream = Files.lines(solutionPath)) {
-            return dataStream.map(PathUtils::escapeProgram)
+            return dataStream.map(FileUtils::escapeProgram)
                     .collect(Collectors.joining("\n"));
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to read program from file: " + solutionPath, e);

@@ -33,10 +33,10 @@ public class ReportController {
             description = "Предоставляет отчёт по решениям")
     public CompletableFuture<String> getMdReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
-            @Parameter(description = "Нижний порог сходства") @Max(0)
+            @Parameter(description = "Нижний порог сходства")
             float similarityThresholdStart,
             @RequestParam(name = "similarity_threshold_end", defaultValue = "100")
-            @Parameter(description = "Верхний порог сходства") @Max(100)
+            @Parameter(description = "Верхний порог сходства")
             float similarityThresholdEnd,
             @RequestBody ReportGetRequest request
     ) {
@@ -51,10 +51,10 @@ public class ReportController {
             description = "Предоставляет отчёт по решениям")
     public CompletableFuture<ReportDto> getJsonReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
-            @Parameter(description = "Нижний порог сходства решений") @Max(0)
+            @Parameter(description = "Нижний порог сходства решений")
             float similarityThresholdStart,
             @RequestParam(name = "similarity_threshold_end", defaultValue = "100")
-            @Parameter(description = "Верхний порог сходства решений") @Max(100)
+            @Parameter(description = "Верхний порог сходства решений")
             float similarityThresholdEnd,
             @RequestBody ReportGetRequest request
     ) {

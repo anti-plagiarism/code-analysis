@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
@@ -22,9 +23,9 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.vk.codeanalysis.Utils.PathUtils.escapeProgram;
-import static com.vk.codeanalysis.Utils.PathUtils.normalizePath;
-import static com.vk.codeanalysis.Utils.PathUtils.readProgramFromFile;
+import static com.vk.codeanalysis.Utils.FileUtils.escapeProgram;
+import static com.vk.codeanalysis.Utils.FileUtils.normalizePath;
+import static com.vk.codeanalysis.Utils.FileUtils.readProgramFromFile;
 
 @Slf4j
 @Service

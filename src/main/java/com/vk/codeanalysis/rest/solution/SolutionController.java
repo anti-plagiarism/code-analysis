@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.vk.codeanalysis.Utils.PathUtils.getLanguageFromExtension;
-import static com.vk.codeanalysis.Utils.PathUtils.getProgram;
+import static com.vk.codeanalysis.Utils.FileUtils.getLanguageFromExtension;
+import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
 
 @RestController
 @RequestMapping("/v0/solutions")
@@ -49,12 +49,13 @@ public class SolutionController {
                 userId,
                 getLanguageFromExtension(file),
                 getProgram(file));
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/ignore", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Игнорировать решение", description = "Позволяет игнорировать решения, которые автор задачи не считает сплагиаченными")
+    @Operation(
+            summary = "Игнорировать решение",
+            description = "Позволяет игнорировать решения, которые автор задачи не считает сплагиаченными")
     public ResponseEntity<String> ignoreSolution(
             @RequestParam(value = "task_id")
             @Parameter(description = "Идентификатор задания", example = "1")

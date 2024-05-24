@@ -1,13 +1,16 @@
 package com.vk.codeanalysis.core.report_generator;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vk.codeanalysis.dto.report.DependentDto;
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.dto.report.SimilarityIntervalDto;
 import com.vk.codeanalysis.dto.report.ReportDto;
-import com.vk.codeanalysis.dto.report.SimilarityDto;
+import com.vk.codeanalysis.dto.report.BaseTaskDto;
 import com.vk.codeanalysis.tokenizer.CollisionReport;
 import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,7 +37,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
             Set<Long> users,
             Set<Language> langs
     ) {
-        Map<Language, List<SimilarityDto>> bodyMap = new HashMap<>();
+        Map<Language, List<BaseTaskDto>> bodyMap = new HashMap<>();
         for (var collectorEntry : collectors.entrySet()) {
             Language language = collectorEntry.getKey();
 
@@ -42,7 +45,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                 continue;
             }
 
-            List<SimilarityDto> similarityList = new ArrayList<>();
+            List<BaseTaskDto> similarityList = new ArrayList<>();
             for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
                 Map<Long, List<Long>> submittedSolutions = detectorsEntry.getValue().getSubmittedSolutions();
                 Map<Long, Long> solutionToUser = detectorsEntry.getValue().getSolutionToUser();
@@ -62,6 +65,8 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                         continue;
                     }
 
+                    List<DependentDto> dependentDtoList = new ArrayList<>();
+
                     int totalFingerprints = reportsEntry.getValue().getTotalFingerprints();
                     for (Map.Entry<Long, Integer> collisionEntry : reportsEntry.getValue().getCollisions().entrySet()) {
                         long currSolutionId = collisionEntry.getKey();
@@ -79,18 +84,24 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                         float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
                         boolean isInInterval = checkThresholdInterval(similarity, thresholdStart, thresholdEnd);
                         if (isInInterval) {
-                            similarityList.add(
-                                    SimilarityDto.builder()
-                                            .taskId(taskId)
-                                            .solutionSrcId(baseSolutionId)
-                                            .solutionTargetId(userCurrId)
-                                            .userSrcId(userBaseId)
-                                            .userTargetId(currSolutionId)
+                            dependentDtoList.add(
+                                    DependentDto.builder()
+                                            .userTargetId(userCurrId)
+                                            .solutionTargetId(currSolutionId)
                                             .matchesPercentage(similarity)
                                             .build()
                             );
                         }
                     }
+
+                    similarityList.add(
+                            BaseTaskDto.builder()
+                                    .taskId(taskId)
+                                    .userSrcId(userBaseId)
+                                    .solutionSrcId(baseSolutionId)
+                                    .dependentDtos(dependentDtoList)
+                                    .build()
+                    );
                 }
             }
             bodyMap.put(language, similarityList);
@@ -112,8 +123,8 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
     @Override
     public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, Language lang) {
 
-        Map<Language, List<SimilarityDto>> bodyMap = new HashMap<>();
-        List<SimilarityDto> similarityList = new ArrayList<>();
+        Map<Language, List<BaseTaskDto>> bodyMap = new HashMap<>();
+        List<BaseTaskDto> similarityList = new ArrayList<>();
 
         TaskCollectorV0 collector = collectors.get(lang);
         PlagiarismDetector detector = collector.getDetectors().get(taskId);
@@ -135,16 +146,16 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
 
             float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
 
-            similarityList.add(
-                    SimilarityDto.builder()
-                            .taskId(taskId)
-                            .solutionSrcId(userId)
-                            .solutionTargetId(userCurrId)
-                            .userSrcId(userCurrId)
-                            .userTargetId(currSolutionId)
-                            .matchesPercentage(similarity)
-                            .build()
-            );
+//            similarityList.add(
+//                    BaseTaskDto.builder()
+//                            .taskId(taskId)
+//                            .solutionSrcId(userId)
+//                            .solutionTargetId(userCurrId)
+//                            .userSrcId(userCurrId)
+//                            .userTargetId(currSolutionId)
+//                            .matchesPercentage(similarity)
+//                            .build()
+//            );
         }
 
         bodyMap.put(lang, similarityList);

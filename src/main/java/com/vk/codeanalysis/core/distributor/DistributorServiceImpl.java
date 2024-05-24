@@ -15,8 +15,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
-import static com.vk.codeanalysis.Utils.PathUtils.getLanguageFromExtension;
-import static com.vk.codeanalysis.Utils.PathUtils.getProgram;
+import static com.vk.codeanalysis.Utils.FileUtils.getLanguageFromExtension;
+import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
 
 @Service
 @Slf4j

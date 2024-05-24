@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.util.List;
+
 @Schema(description = "Сущность совпадений решений")
 @Builder
-public record SimilarityDto(
+public record BaseTaskDto(
         @Schema(description = "Идентификатор решённого задания")
         @JsonProperty(value = "task_id")
         long taskId,
@@ -16,15 +18,11 @@ public record SimilarityDto(
         @Schema(description = "Идентификатор украденного решения")
         @JsonProperty(value = "solution_src_id")
         long solutionSrcId,
-        @Schema(description = "Идентификатор пользователя, который мог украсть решение")
-        @JsonProperty(value = "user_target_id")
-        long userTargetId,
-        @Schema(description = "Идентификатор решения, который мы считаем сплагиаченным")
-        @JsonProperty(value = "solution_target_id")
-        long solutionTargetId,
-        @Schema(description = "Процент совпадения между решениями")
-        @JsonProperty(value = "matches_percentage")
-        float matchesPercentage
+
+        @Schema(description = "")
+        @JsonProperty(value = "dependent_dtos")
+        List<DependentDto> dependentDtos
+
 ) {
 
 }
