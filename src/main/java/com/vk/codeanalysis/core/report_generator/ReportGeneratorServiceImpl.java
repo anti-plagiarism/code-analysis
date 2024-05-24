@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
         for (var collectorEntry : collectors.entrySet()) {
             Language language = collectorEntry.getKey();
 
-            if (langs != null && !langs.contains(language)) {
+            if (langs != null && !langs.isEmpty() && !langs.contains(language)) {
                 continue;
             }
 
@@ -47,7 +48,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                 Map<Long, Long> solutionToUser = detectorsEntry.getValue().getSolutionToUser();
                 long taskId = detectorsEntry.getKey();
 
-                if (tasks != null && !tasks.contains(taskId)) {
+                if (tasks != null && !tasks.isEmpty() && !tasks.contains(taskId)) {
                     continue;
                 }
 
@@ -66,7 +67,7 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                         long currSolutionId = collisionEntry.getKey();
                         long userCurrId = solutionToUser.get(currSolutionId);
 
-                        if (users != null
+                        if (users != null && !users.isEmpty()
                                 && (!users.contains(userBaseId) || !users.contains(userCurrId))) {
                             continue;
                         }
@@ -89,7 +90,6 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                                             .build()
                             );
                         }
-
                     }
                 }
             }
@@ -105,14 +105,55 @@ public class ReportGeneratorServiceImpl implements ReportGeneratorService {
                 .build();
     }
 
-    @Override
-    public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, Language lang, String code) {
-        // TODO
-        return null;
-    }
-
     private static boolean checkThresholdInterval(float value, float start, float end) {
         return value >= start && value <= end;
     }
 
+    @Override
+    public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, Language lang) {
+
+        Map<Language, List<SimilarityDto>> bodyMap = new HashMap<>();
+        List<SimilarityDto> similarityList = new ArrayList<>();
+
+        TaskCollectorV0 collector = collectors.get(lang);
+        PlagiarismDetector detector = collector.getDetectors().get(taskId);
+
+        Map<Long, List<Long>> submittedSolutions = detector.getSubmittedSolutions();
+        Map<Long, Long> solutionToUser = detector.getSolutionToUser();
+
+        CollisionReport report = detector.getReports().get(solutionId);
+        int totalFingerprints = report.getTotalFingerprints();
+
+        for (Map.Entry<Long, Integer> collisionEntry : report.getCollisions().entrySet()) {
+            long currSolutionId = collisionEntry.getKey();
+            long userCurrId = solutionToUser.get(currSolutionId);
+
+            if (submittedSolutions.get(userCurrId).getLast() != currSolutionId) {
+                // Игнорируем непоследнее решение.
+                continue;
+            }
+
+            float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
+
+            similarityList.add(
+                    SimilarityDto.builder()
+                            .taskId(taskId)
+                            .solutionSrcId(userId)
+                            .solutionTargetId(userCurrId)
+                            .userSrcId(userCurrId)
+                            .userTargetId(currSolutionId)
+                            .matchesPercentage(similarity)
+                            .build()
+            );
+        }
+
+        bodyMap.put(lang, similarityList);
+
+        return ReportDto.builder()
+                .tasks(Collections.singleton(taskId))
+                .users(Collections.singleton(userId))
+                .languages(Collections.singleton(lang))
+                .body(bodyMap)
+                .build();
+    }
 }

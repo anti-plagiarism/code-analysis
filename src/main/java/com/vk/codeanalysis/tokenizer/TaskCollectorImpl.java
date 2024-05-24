@@ -17,7 +17,7 @@ public class TaskCollectorImpl implements TaskCollectorV0 {
     }
 
     @Override
-    public void add(long taskId, long userId, long solutionId, String program) {
+    public void add(long taskId, long solutionId, long userId, String program) {
         PlagiarismDetector detector = detectors.computeIfAbsent(taskId, id -> new PlagiarismDetector(language));
         detector.processFile(userId, solutionId, program);
     }

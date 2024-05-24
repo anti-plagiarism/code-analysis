@@ -15,8 +15,15 @@ executor:
 
 spring:
   mvc:
-    static-path-pattern: /swagger*
+    static-path-pattern: /swagger*'
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
 
 springdoc:
   api-docs:
     path: /api-docs
+
+

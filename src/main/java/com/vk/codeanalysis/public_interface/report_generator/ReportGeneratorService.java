@@ -11,9 +11,9 @@ public interface ReportGeneratorService {
      * Метод генерации общего отчета.
      * @param thresholdStart Нижний порог сходства решений
      * @param thresholdEnd Верхний порог сходства решений
-     * @param tasks Список задач (учитывается если не равен null)
-     * @param users Список пользователей (учитывается если не равен null)
-     * @param langs Список языков (учитывается если не равен null)
+     * @param tasks Список задач (учитывается, если непустой и не равен null)
+     * @param users Список пользователей (учитывается, если непустой и не равен null)
+     * @param langs Список языков (учитывается, если непустой и не равен null)
      * @return ReportDto отчёт в формате json
      */
     ReportDto generateGeneralReport(
@@ -29,13 +29,11 @@ public interface ReportGeneratorService {
      * @param solutionId ID решения
      * @param userId ID пользователя
      * @param lang Язык программирования
-     * @param code Само решение
      * @return ReportDto отчёт в формате json
      */
     ReportDto generatePrivateReport(
             long taskId,
             long solutionId,
             long userId,
-            Language lang,
-            String code);
+            Language lang);
 }
