@@ -33,6 +33,12 @@ public class FileTrackerService {
 
     @Value("${file-tracker.path}")
     private String trackPath;
+    @Value("${file-tracker.task-dir-suffix}")
+    private String taskSuffix;
+    @Value("${file-tracker.user-dir-suffix}")
+    private String userSuffix;
+    @Value("${file-tracker.solution-dir-suffix}")
+    private String solutionSuffix;
 
     private static final Pattern SOLUTION_PATH_PATTERN = Pattern.compile(
             "/(\\d+)_task/(\\d+)_user/(\\d+)_[-.\\w_()=\\s',]+\\.(\\w+)");
@@ -89,8 +95,7 @@ public class FileTrackerService {
 
         Matcher matcher = SOLUTION_PATH_PATTERN.matcher(relativePath);
         if (!matcher.matches()) {
-            // todo merge new matcher pattern
-//            log.error("Path does not match: {}", relativePath);
+            log.error("Path does not match: {}", relativePath);
             return Optional.empty();
         }
 
@@ -104,7 +109,7 @@ public class FileTrackerService {
             long userId = Long.parseLong(matcher.group(USER_GROUP));
             long solutionId = Long.parseLong(matcher.group(SOLUTION_GROUP));
 
-            String file = readProgramFromFile(solutionPath);
+            String file = readProgramFromFile(solutionPath).orElse("Исходный код не найден");
 
             return Optional.of(
                     SolutionDto.builder()
@@ -119,26 +124,12 @@ public class FileTrackerService {
         }
     }
 
-    public Optional<SolutionDto> fetchSolutionContent(long taskId, long userId, long solutionId) {
-        Path rootPath = Path.of(trackPath);
-        try {
-            return Files.walk(rootPath)
-                    .filter(Files::isRegularFile)
-                    .map(this::parseSolutionPathHelper)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .filter(solution -> solution.taskId() == taskId
-                            && solution.userId() == userId
-                            && solution.solutionId() == solutionId)
-                    .findFirst();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
+    public Optional<String> fetchSolutionContent(long taskId, long userId, long solutionId) {
+        Path solutionPath = Path.of(trackPath)
+                .resolve(taskId + taskSuffix)
+                .resolve(userId + userSuffix)
+                .resolve(solutionId + solutionSuffix);
 
-    private Optional<SolutionDto> parseSolutionPathHelper(Path file) {
-        Path rootPath = Path.of(trackPath);
-        return parseSolutionPath(file, rootPath);
+        return readProgramFromFile(solutionPath);
     }
-
 }

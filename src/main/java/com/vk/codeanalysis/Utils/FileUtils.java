@@ -7,9 +7,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,12 +32,14 @@ public final class FileUtils {
         return path.toString().replace("\\", "/");
     }
 
-    public static String readProgramFromFile(Path solutionPath) {
+    public static Optional<String> readProgramFromFile(Path solutionPath) {
         try (Stream<String> dataStream = Files.lines(solutionPath)) {
-            return dataStream.map(FileUtils::escapeProgram)
+            String code = dataStream.map(FileUtils::escapeProgram)
                     .collect(Collectors.joining("\n"));
+            return Optional.of(code);
         } catch (IOException e) {
-            throw new UncheckedIOException("Failed to read program from file: " + solutionPath, e);
+            log.error("Failed to read program from file: " + solutionPath);
+            return Optional.empty();
         }
     }
 

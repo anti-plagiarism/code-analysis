@@ -3,6 +3,9 @@ server:
 
 file-tracker:
   path: ${FILE_TRACKER_PATH}
+  task-dir-suffix: _task
+  user-dir-suffix: _user
+  solution-dir-suffix: _solution
 
 executor:
   keep-alive-in-seconds: 3

@@ -4,7 +4,6 @@ import com.vk.codeanalysis.core.file_tracker.FileTrackerService;
 import com.vk.codeanalysis.dto.report.BaseTaskDto;
 import com.vk.codeanalysis.dto.report.ReportDto;
 import com.vk.codeanalysis.dto.report.SimilarityIntervalDto;
-import com.vk.codeanalysis.dto.report.SolutionDto;
 import com.vk.codeanalysis.public_interface.report_generator.MdReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -43,10 +41,9 @@ public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
                         .append("#### Исходный код решения:\n")
                         .append("\n");
 
-                Optional<SolutionDto> solutionDto =
-                        fileTrackerService.fetchSolutionContent(task.taskId(), task.userId(), task.solutionId());
-
-                String sourceCode = solutionDto.map(SolutionDto::file).orElse("Исходный код не найден");
+                String sourceCode = fileTrackerService
+                        .fetchSolutionContent(task.taskId(), task.userId(), task.solutionId())
+                        .orElse("Исходный код не найден");
 
                 mdBuilder.append("\n")
                         .append("<details>\n")
@@ -58,9 +55,13 @@ public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
 
                 mdBuilder.append("#### Сходства с другими:\n");
 
-                task.dependentTasks().forEach(dependent -> mdBuilder.append("- ID пользователя (цель): ").append(dependent.userId()).append("\n")
-                        .append("  ID решения (цель): ").append(dependent.solutionId()).append("\n")
-                        .append("  Процент совпадений: ").append(dependent.matchesPercentage()).append("%\n"));
+                task.dependentTasks()
+                        .forEach(dependent -> mdBuilder.append("- ID пользователя (цель): ")
+                                .append(dependent.userId()).append("\n")
+                                .append("  ID решения (цель): ")
+                                .append(dependent.solutionId()).append("\n")
+                                .append("  Процент совпадений: ")
+                                .append(dependent.matchesPercentage()).append("%\n"));
 
                 mdBuilder.append("\n");
             });
