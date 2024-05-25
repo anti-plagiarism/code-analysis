@@ -65,7 +65,6 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
                 voidResult -> reportGenerator.generatePrivateReport(taskId, solutionId, userId, language),
                 reportExecutor
         );
-        // TODO обработать исключения
     }
 
     @Override

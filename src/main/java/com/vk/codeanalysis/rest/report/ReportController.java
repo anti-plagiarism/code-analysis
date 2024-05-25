@@ -40,11 +40,14 @@ public class ReportController {
             float similarityThresholdEnd,
             @RequestBody ReportGetRequest request
     ) {
-        return distributorService.getGeneralReport(similarityThresholdStart,
-                similarityThresholdEnd,
-                request.tasks(),
-                request.users(),
-                request.langs()).thenApply(mdReportGeneratorService::convertToMarkdown);
+        return distributorService
+                .getGeneralReport(
+                        similarityThresholdStart,
+                        similarityThresholdEnd,
+                        request.tasks(),
+                        request.users(),
+                        request.langs())
+                .thenApply(mdReportGeneratorService::convertToMarkdown);
     }
 
     @GetMapping("/json")
@@ -62,7 +65,8 @@ public class ReportController {
     ) {
 
         return distributorService
-                .getGeneralReport(similarityThresholdStart,
+                .getGeneralReport(
+                        similarityThresholdStart,
                         similarityThresholdEnd,
                         request.tasks(),
                         request.users(),
@@ -77,13 +81,10 @@ public class ReportController {
             @RequestParam("task_id") @Parameter(description = "ID задачи") long taskId,
             @RequestParam("solution_id") @Parameter(description = "ID решения") long solutionId,
             @RequestParam("user_id") @Parameter(description = "ID пользователя") long userId,
-            @RequestParam("file") @Parameter(description = "Список языков программирования") MultipartFile file
+            @RequestParam("file") @Parameter(description = "Исходный код") MultipartFile file
     ) {
         return distributorService
-                .getPrivateReport(taskId,
-                        solutionId,
-                        userId,
-                        file)
+                .getPrivateReport(taskId, solutionId, userId, file)
                 .thenApply(mdReportGeneratorService::convertToMarkdown);
     }
 
@@ -95,13 +96,9 @@ public class ReportController {
             @RequestParam("task_id") @Parameter(description = "ID задачи") long taskId,
             @RequestParam("solution_id") @Parameter(description = "ID решения") long solutionId,
             @RequestParam("user_id") @Parameter(description = "ID пользователя") long userId,
-            @RequestParam("file") @Parameter(description = "Список языков программирования") MultipartFile file
+            @RequestParam("file") @Parameter(description = "Исходный код") MultipartFile file
     ) {
 
-        return distributorService
-                .getPrivateReport(taskId,
-                        solutionId,
-                        userId,
-                        file);
+        return distributorService.getPrivateReport(taskId, solutionId, userId, file);
     }
 }

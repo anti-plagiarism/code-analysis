@@ -23,7 +23,7 @@ import java.util.Set;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class ReportGeneratorServiceImpl implements ReportGeneratorService {
+public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
 
     private final Map<Language, TaskCollectorV0> collectors;
 
