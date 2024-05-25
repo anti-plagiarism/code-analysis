@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.vk.codeanalysis.Utils.FileUtils.escapeProgram;
 import static com.vk.codeanalysis.Utils.FileUtils.normalizePath;
 import static com.vk.codeanalysis.Utils.FileUtils.readProgramFromFile;
 
@@ -90,7 +89,8 @@ public class FileTrackerService {
 
         Matcher matcher = SOLUTION_PATH_PATTERN.matcher(relativePath);
         if (!matcher.matches()) {
-            log.error("Path does not match: {}", relativePath);
+            // todo merge new matcher pattern
+//            log.error("Path does not match: {}", relativePath);
             return Optional.empty();
         }
 
@@ -105,7 +105,6 @@ public class FileTrackerService {
             long solutionId = Long.parseLong(matcher.group(SOLUTION_GROUP));
 
             String file = readProgramFromFile(solutionPath);
-            String escapedFile = escapeProgram(file);
 
             return Optional.of(
                     SolutionDto.builder()
@@ -113,10 +112,9 @@ public class FileTrackerService {
                             .userId(userId)
                             .solutionId(solutionId)
                             .language(language)
-                            .file(escapedFile)
+                            .file(file)
                             .build());
         } catch (IllegalArgumentException e) {
-            log.error("Error: wrong file extension" + solutionPath);
             return Optional.empty();
         }
     }

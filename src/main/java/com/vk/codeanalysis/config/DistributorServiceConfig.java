@@ -56,7 +56,7 @@ public class DistributorServiceConfig {
         return Map.of(
                 Language.JAVA, new TaskCollectorImpl(new TreeSitterJava()),
                 Language.CPP, new TaskCollectorImpl(new TreeSitterCpp()),
-                Language.PYTHON, new TaskCollectorImpl(new TreeSitterPython())
+                Language.PY, new TaskCollectorImpl(new TreeSitterPython())
         );
     }
 }

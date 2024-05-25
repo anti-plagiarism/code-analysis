@@ -5,19 +5,22 @@ import com.vk.codeanalysis.dto.report.BaseTaskDto;
 import com.vk.codeanalysis.dto.report.ReportDto;
 import com.vk.codeanalysis.dto.report.SimilarityIntervalDto;
 import com.vk.codeanalysis.dto.report.SolutionDto;
+import com.vk.codeanalysis.public_interface.report_generator.MdReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class MdReportGenerator {
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
 
     private final FileTrackerService fileTrackerService;
-
-    public MdReportGenerator(FileTrackerService fileTrackerService) {
-        this.fileTrackerService = fileTrackerService;
-    }
 
     public String convertToMarkdown(ReportDto report) {
         StringBuilder mdBuilder = new StringBuilder();

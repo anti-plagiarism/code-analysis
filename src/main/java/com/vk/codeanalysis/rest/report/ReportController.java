@@ -1,7 +1,6 @@
 package com.vk.codeanalysis.rest.report;
 
-import com.vk.codeanalysis.core.file_tracker.FileTrackerService;
-import com.vk.codeanalysis.core.report_generator.MdReportGenerator;
+import com.vk.codeanalysis.core.report_generator.MdReportGeneratorServiceImpl;
 import com.vk.codeanalysis.dto.report.ReportDto;
 import com.vk.codeanalysis.dto.request.ReportGetRequest;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
@@ -26,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 @Tag(name = "Контролер отчётов", description = "Позволяет получить отчёты по загруженным решениям")
 public class ReportController {
     private final DistributorServiceV0 distributorService;
-    private final FileTrackerService fileTrackerService;
+    private final MdReportGeneratorServiceImpl mdReportGeneratorService;
 
     @GetMapping(value = "/md", produces = MediaType.TEXT_MARKDOWN_VALUE)
     @Operation(
@@ -45,7 +44,7 @@ public class ReportController {
                 similarityThresholdEnd,
                 request.tasks(),
                 request.users(),
-                request.langs()).thenApply(new MdReportGenerator(fileTrackerService)::convertToMarkdown);
+                request.langs()).thenApply(mdReportGeneratorService::convertToMarkdown);
     }
 
     @GetMapping("/json")
