@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitResult;
@@ -99,21 +98,49 @@ public class FileTrackerService {
     }
 
     private Optional<SolutionDto> getSolutionEntity(Matcher matcher, Path solutionPath) {
-        Language language = Language.valueOf(matcher.group(EXT_GROUP).toUpperCase());
-        long taskId = Long.parseLong(matcher.group(TASK_GROUP));
-        long userId = Long.parseLong(matcher.group(USER_GROUP));
-        long solutionId = Long.parseLong(matcher.group(SOLUTION_GROUP));
+        try {
+            Language language = Language.valueOf(matcher.group(EXT_GROUP).toUpperCase());
+            long taskId = Long.parseLong(matcher.group(TASK_GROUP));
+            long userId = Long.parseLong(matcher.group(USER_GROUP));
+            long solutionId = Long.parseLong(matcher.group(SOLUTION_GROUP));
 
-        String file = readProgramFromFile(solutionPath);
-        String escapedFile = escapeProgram(file);
+            String file = readProgramFromFile(solutionPath);
+            String escapedFile = escapeProgram(file);
 
-        return Optional.of(
-                SolutionDto.builder()
-                        .taskId(taskId)
-                        .userId(userId)
-                        .solutionId(solutionId)
-                        .language(language)
-                        .file(escapedFile)
-                        .build());
+            return Optional.of(
+                    SolutionDto.builder()
+                            .taskId(taskId)
+                            .userId(userId)
+                            .solutionId(solutionId)
+                            .language(language)
+                            .file(escapedFile)
+                            .build());
+        } catch (IllegalArgumentException e) {
+            log.error("Error: wrong file extension" + solutionPath);
+            return Optional.empty();
+        }
     }
+
+    public Optional<SolutionDto> fetchSolutionContent(long taskId, long userId, long solutionId) {
+        Path rootPath = Path.of(trackPath);
+        try {
+            return Files.walk(rootPath)
+                    .filter(Files::isRegularFile)
+                    .map(this::parseSolutionPathHelper)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .filter(solution -> solution.taskId() == taskId
+                            && solution.userId() == userId
+                            && solution.solutionId() == solutionId)
+                    .findFirst();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private Optional<SolutionDto> parseSolutionPathHelper(Path file) {
+        Path rootPath = Path.of(trackPath);
+        return parseSolutionPath(file, rootPath);
+    }
+
 }

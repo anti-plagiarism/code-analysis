@@ -1,12 +1,13 @@
 package com.vk.codeanalysis.rest.report;
 
+import com.vk.codeanalysis.core.file_tracker.FileTrackerService;
+import com.vk.codeanalysis.core.report_generator.MdReportGenerator;
+import com.vk.codeanalysis.dto.report.ReportDto;
 import com.vk.codeanalysis.dto.request.ReportGetRequest;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.dto.report.ReportDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,8 +26,9 @@ import java.util.concurrent.CompletableFuture;
 @Tag(name = "Контролер отчётов", description = "Позволяет получить отчёты по загруженным решениям")
 public class ReportController {
     private final DistributorServiceV0 distributorService;
+    private final FileTrackerService fileTrackerService;
 
-    @GetMapping("/md")
+    @GetMapping(value = "/md", produces = MediaType.TEXT_MARKDOWN_VALUE)
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решениям")
@@ -39,9 +41,11 @@ public class ReportController {
             float similarityThresholdEnd,
             @RequestBody ReportGetRequest request
     ) {
-
-        // TODO
-        return null;
+        return distributorService.getGeneralReport(similarityThresholdStart,
+                similarityThresholdEnd,
+                request.tasks(),
+                request.users(),
+                request.langs()).thenApply(new MdReportGenerator(fileTrackerService)::convertToMarkdown);
     }
 
     @GetMapping("/json")

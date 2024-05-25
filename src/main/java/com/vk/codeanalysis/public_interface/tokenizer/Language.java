@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum Language {
     JAVA("java"),
     CPP("cpp"),
-    PYTHON("python");
+    PYTHON("py");
 
     private final String name;
 }
