@@ -39,7 +39,8 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
                                                          Set<Long> tasks,
                                                          Set<Long> users,
                                                          Set<Language> langs) {
-        if (thresholdStart > thresholdEnd) {
+        if (isThresholdIncorrect(thresholdStart) || isThresholdIncorrect(thresholdEnd)
+                || thresholdStart > thresholdEnd) {
             throw new IllegalArgumentException("Wrong similarity threshold value");
         }
 
@@ -82,5 +83,9 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
             throw new IllegalArgumentException("Unsupported language");
         }
         return collector;
+    }
+
+    private boolean isThresholdIncorrect(float threshold) {
+        return threshold < 0 || threshold > 100;
     }
 }

@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,13 +23,15 @@ import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
 @Tag(
         name = "Контролер решений",
         description = "Позволяет загружать решения для проверки на антиплагиат" +
-                "или загружать авторские решения, чтобы избагать неоправданной блокировки"
+                "или загружать авторские решения, чтобы избeгать неоправданной блокировки"
 )
 public class SolutionController {
     private final DistributorServiceV0 distributorService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Предоставить решение в обработку", description = "Позволяет загрузить пользовательское решение в систему")
+    @Operation(
+            summary = "Предоставить решение в обработку",
+            description = "Позволяет загрузить пользовательское решение в систему")
     public ResponseEntity<String> insertSolution(
             @RequestParam(value = "task_id")
             @Parameter(description = "Идентификатор задания", example = "1")
@@ -41,7 +42,8 @@ public class SolutionController {
             @RequestParam(value = "user_id")
             @Parameter(description = "Идентификатор пользователя из системы", example = "1")
             Long userId,
-            @RequestPart(value = "file") MultipartFile file
+            @RequestParam("file")
+            MultipartFile file
     ) {
         distributorService.put(
                 taskId,
@@ -60,7 +62,8 @@ public class SolutionController {
             @RequestParam(value = "task_id")
             @Parameter(description = "Идентификатор задания", example = "1")
             Long taskId,
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file")
+            MultipartFile file
     ) {
         distributorService.addIgnored(taskId, file);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
