@@ -79,8 +79,11 @@ public class ReportController {
             @RequestParam("user_id") @Parameter(description = "ID пользователя") long userId,
             @RequestParam("file") @Parameter(description = "Список языков программирования") MultipartFile file
     ) {
-        // TODO
-        return null;
+        return distributorService
+                .getPrivateReport(taskId,
+                        solutionId,
+                        userId,
+                        file).thenApply(mdReportGeneratorService::convertToMarkdown);
     }
 
     @PostMapping(path = "/private/json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
