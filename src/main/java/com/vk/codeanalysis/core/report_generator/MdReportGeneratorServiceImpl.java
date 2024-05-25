@@ -42,8 +42,8 @@ public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
                         .append("\n");
 
                 String sourceCode = fileTrackerService
-                        .fetchSolutionContent(task.taskId(), task.userId(), task.solutionId())
-                        .orElse("Исходный код не найден");
+                        .fetchSolutionContent(task.taskId(), task.userId(), task.solutionId(), language)
+                        .orElse("Исходный код не представлен");
 
                 mdBuilder.append("\n")
                         .append("<details>\n")

@@ -109,27 +109,33 @@ public class FileTrackerService {
             long userId = Long.parseLong(matcher.group(USER_GROUP));
             long solutionId = Long.parseLong(matcher.group(SOLUTION_GROUP));
 
-            String file = readProgramFromFile(solutionPath).orElse("Исходный код не найден");
+            Optional<String> file = readProgramFromFile(solutionPath);
 
-            return Optional.of(
-                    SolutionDto.builder()
-                            .taskId(taskId)
-                            .userId(userId)
-                            .solutionId(solutionId)
-                            .language(language)
-                            .file(file)
-                            .build());
-        } catch (IllegalArgumentException e) {
+            return file.map(code -> SolutionDto.builder()
+                    .taskId(taskId)
+                    .userId(userId)
+                    .solutionId(solutionId)
+                    .language(language)
+                    .file(code)
+                    .build());
+
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
 
-    public Optional<String> fetchSolutionContent(long taskId, long userId, long solutionId) {
-        Path solutionPath = Path.of(trackPath)
+    public Optional<String> fetchSolutionContent(long taskId, long userId, long solutionId, Language language) {
+
+        Path filePath = Path.of(trackPath)
                 .resolve(taskId + taskSuffix)
                 .resolve(userId + userSuffix)
-                .resolve(solutionId + solutionSuffix);
+                .resolve(solutionId + solutionSuffix + "." + language.name().toLowerCase());
 
-        return readProgramFromFile(solutionPath);
+        try {
+            return readProgramFromFile(filePath);
+        } catch (Exception e) {
+            log.error("Файл не найден: {}", filePath);
+            return Optional.empty();
+        }
     }
 }
