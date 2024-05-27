@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @RestController
 @RequestMapping("/v0/reports")
@@ -26,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 public class ReportController {
     private final DistributorServiceV0 distributorService;
     private final MdReportGeneratorServiceImpl mdReportGeneratorService;
+    private final ExecutorService reportExecutor;
 
     @GetMapping(value = "/md", produces = MediaType.TEXT_MARKDOWN_VALUE)
     @Operation(
@@ -47,7 +49,7 @@ public class ReportController {
                         request.tasks(),
                         request.users(),
                         request.langs())
-                .thenApply(mdReportGeneratorService::convertToMarkdown);
+                .thenApplyAsync(mdReportGeneratorService::convertToMarkdown, reportExecutor);
     }
 
     @GetMapping("/json")
@@ -85,7 +87,7 @@ public class ReportController {
     ) {
         return distributorService
                 .getPrivateReport(taskId, solutionId, userId, file)
-                .thenApply(mdReportGeneratorService::convertToMarkdown);
+                .thenApplyAsync(mdReportGeneratorService::convertToMarkdownPrivate, reportExecutor);
     }
 
     @PostMapping(path = "/private/json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
