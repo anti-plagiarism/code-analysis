@@ -16,6 +16,10 @@ public class CollisionReport {
     }
 
     public void addCollisionWith(Long solutionId) {
-        collisions.compute(solutionId, (key, oldValue) -> oldValue == null ? 1 : oldValue + 1);
+        addManyCollisionsWith(solutionId, 1);
+    }
+
+    public void addManyCollisionsWith(Long solutionId, int cnt) {
+        collisions.compute(solutionId, (key, oldValue) -> oldValue == null ? cnt : oldValue + cnt);
     }
 }

@@ -19,6 +19,7 @@ configurations {
 
 repositories {
     mavenCentral()
+    google()
 }
 
 dependencies {
@@ -47,7 +48,7 @@ dependencies {
 
 //    testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.testcontainers:junit-jupiter:5.10.0'
+    testImplementation 'org.testcontainers:junit-jupiter:1.18.3'
 }
 
 tasks.named('test') {

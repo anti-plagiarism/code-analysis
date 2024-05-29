@@ -28,7 +28,13 @@ public class Fingerprinter {
         this.tsParser = tsParser;
     }
 
-    public Iterator<Integer> getFingerprints(String file, int winnowLength) {
+    public Fingerprinter(TSParser tsParser, int k, int windowLength) {
+        this.tsParser = tsParser;
+        this.k = k;
+        this.windowLength = windowLength;
+    }
+
+    public Iterator<Integer> getFingerprints(String file) {
         TSTree tree = tsParser.parseStringEncoding(null, file, TSInputEncoding.TSInputEncodingUTF8);
         KGram kGram = new KGram(k);
 
@@ -42,26 +48,11 @@ public class Fingerprinter {
                 }
         );
 
-        return new WinnowingIterator(mapIterator, winnowLength);
-    }
-
-    private static String readFile(File file) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            StringBuilder ans = new StringBuilder();
-            while (true) {
-                String line = reader.readLine();
-                if (line == null) {
-                    break;
-                }
-                ans.append(line);
-                ans.append("\n");
-            }
-            return ans.toString();
-        }
+        return new WinnowingIterator(mapIterator, windowLength);
     }
 
     public Iterator<Integer> getFingerprintsFromFile(File file) throws IOException {
-        TSTree tree = tsParser.parseStringEncoding(null, readFile(file), TSInputEncoding.TSInputEncodingUTF8);
+        TSTree tree = tsParser.parseStringEncoding(null, Utils.readFile(file), TSInputEncoding.TSInputEncodingUTF8);
         KGram kGram = new KGram(k);
         return new WinnowingIterator(
                 new MapIterator<>(
