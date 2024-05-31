@@ -66,7 +66,7 @@ public class Fingerprinter {
                             kGram.put(node.getSymbol());
                             return kGram.getHashCode();
                         }
-                ), WINDOW_LENGTH
+                ),WINDOW_LENGTH
         );
     }
 

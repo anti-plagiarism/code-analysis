@@ -1,18 +1,22 @@
 package com.vk.codeanalysis.core.distributor;
 
-import com.vk.codeanalysis.dto.request.SolutionIgnoreRequest;
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
+import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import com.vk.codeanalysis.dto.report.ReportDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+
+import static com.vk.codeanalysis.Utils.FileUtils.getLanguageFromExtension;
+import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
 
 @Service
 @Slf4j
@@ -20,25 +24,13 @@ import java.util.concurrent.ExecutorService;
 public class DistributorServiceImpl implements DistributorServiceV0 {
     private final ExecutorService submitExecutor;
     private final ExecutorService reportExecutor;
-    private final Map<String, TaskCollectorV0> collectors;
+    private final Map<Language, TaskCollectorV0> collectors;
     private final ReportGeneratorService reportGenerator;
 
     @Override
-    public void put(long taskId, long solutionId, long userId, String lang, String code) {
-        TaskCollectorV0 collector = collectors.get(lang);
-
-        if (collector == null) {
-            throw new IllegalArgumentException("Unsupported language");
-        }
-
-        submitExecutor.execute(() ->
-                collector.add(
-                        taskId,
-                        solutionId,
-                        userId,
-                        code
-                )
-        );
+    public void put(Long taskId, Long solutionId, Long userId, Language language, String file) {
+        TaskCollectorV0 collector = getCollector(language);
+        collector.add(taskId, solutionId, userId, file);
     }
 
     @Override
@@ -46,18 +38,15 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
                                                          float thresholdEnd,
                                                          Set<Long> tasks,
                                                          Set<Long> users,
-                                                         Set<String> langs) {
-        if (
-                thresholdStart < 0 || thresholdStart > 100
-                        || thresholdEnd < 0 || thresholdEnd > 100
-                        || thresholdStart > thresholdEnd
-        ) {
+                                                         Set<Language> langs) {
+        if (isThresholdIncorrect(thresholdStart) || isThresholdIncorrect(thresholdEnd)
+                || thresholdStart > thresholdEnd) {
             throw new IllegalArgumentException("Wrong similarity threshold value");
         }
 
         return CompletableFuture.supplyAsync(
                 () -> reportGenerator.generateGeneralReport(thresholdStart, thresholdEnd, tasks, users, langs),
-                submitExecutor
+                reportExecutor
         );
     }
 
@@ -65,39 +54,37 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
     public CompletableFuture<ReportDto> getPrivateReport(long taskId,
                                                          long solutionId,
                                                          long userId,
-                                                         String lang,
-                                                         String code) {
+                                                         MultipartFile file) {
+        Language language = getLanguageFromExtension(file);
+        TaskCollectorV0 collector = getCollector(language);
+
+        return CompletableFuture.runAsync(
+                () -> collector.add(taskId, solutionId, userId, getProgram(file)),
+                submitExecutor
+        ).thenApplyAsync(
+                voidResult -> reportGenerator.generatePrivateReport(taskId, solutionId, userId, language),
+                reportExecutor
+        );
+    }
+
+    @Override
+    public void addIgnored(Long taskId, MultipartFile file) {
+        Language language = getLanguageFromExtension(file);
+        TaskCollectorV0 collector = getCollector(language);
+
+        collector.addIgnored(taskId, getProgram(file));
+    }
+
+    private TaskCollectorV0 getCollector(Language lang) {
         TaskCollectorV0 collector = collectors.get(lang);
 
         if (collector == null) {
             throw new IllegalArgumentException("Unsupported language");
         }
-
-        CompletableFuture<ReportDto> reportDto = CompletableFuture.runAsync(
-                () -> collector.add(taskId, solutionId, userId, code),
-                submitExecutor
-        ).thenApplyAsync(
-                voidResult -> reportGenerator
-                        .generatePrivateReport(taskId, solutionId, userId, lang, code),
-                reportExecutor
-        );
-
-        // TODO обработать исключения
-
-        return reportDto;
+        return collector;
     }
 
-    @Override
-    public void addIgnored(SolutionIgnoreRequest request) {
-        TaskCollectorV0 collector = collectors.get(request.lang().getName());
-
-        if (collector == null) {
-            throw new IllegalArgumentException("Unsupported language");
-        }
-
-        submitExecutor.execute(() ->
-                collector.addIgnored(request.taskId(), request.program())
-        );
+    private boolean isThresholdIncorrect(float threshold) {
+        return threshold < 0 || threshold > 100;
     }
-
 }

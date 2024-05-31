@@ -24,16 +24,12 @@ repositories {
 dependencies {
 //    tree sitter
     implementation 'io.github.bonede:tree-sitter:0.20.8'
-
 //    python parser
     implementation 'io.github.bonede:tree-sitter-python:0.20.4'
 //    c++ parser
     implementation "io.github.bonede:tree-sitter-cpp:0.22.0"
 //    java parser
     implementation "io.github.bonede:tree-sitter-java:0.20.2"
-
-//    one-nio
-    implementation 'ru.odnoklassniki:one-nio:1.7.1'
 
 //    spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -45,9 +41,13 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+//    utility classes
+    implementation("commons-io:commons-io:2.16.1")
+
 //    testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.testcontainers:junit-jupiter:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+
 }
 
 tasks.named('test') {

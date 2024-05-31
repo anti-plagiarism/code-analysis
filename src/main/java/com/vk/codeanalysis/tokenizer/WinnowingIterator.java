@@ -7,14 +7,12 @@ import java.util.List;
 public class WinnowingIterator implements Iterator<Integer> {
     private final Iterator<Integer> iterator;
     private final int[] window;
-    private final int k;
     private boolean filled;
     private int counter;
     private int minValue;
 
     public WinnowingIterator(Iterator<Integer> iterator, int k) {
         this.iterator = iterator;
-        this.k = k;
         this.window = new int[k];
     }
 

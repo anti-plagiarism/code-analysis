@@ -1,19 +1,24 @@
 package com.vk.codeanalysis.rest.report;
 
-import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
+import com.vk.codeanalysis.core.report_generator.MdReportGeneratorServiceImpl;
 import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.dto.request.ReportGetRequest;
+import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @RestController
 @RequestMapping("/v0/reports")
@@ -21,8 +26,10 @@ import java.util.concurrent.CompletableFuture;
 @Tag(name = "Контролер отчётов", description = "Позволяет получить отчёты по загруженным решениям")
 public class ReportController {
     private final DistributorServiceV0 distributorService;
+    private final MdReportGeneratorServiceImpl mdReportGeneratorService;
+    private final ExecutorService reportExecutor;
 
-    @GetMapping("/md/")
+    @GetMapping(value = "/md", produces = MediaType.TEXT_MARKDOWN_VALUE)
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решениям")
@@ -33,25 +40,22 @@ public class ReportController {
             @RequestParam(name = "similarity_threshold_end", defaultValue = "100")
             @Parameter(description = "Верхний порог сходства")
             float similarityThresholdEnd,
-            @RequestParam(name = "tasks", required = false)
-            @Parameter(description = "Список идентификаторов задач")
-            Set<Long> taskList,
-            @RequestParam(name = "users", required = false)
-            @Parameter(description = "Список идентификаторов пользователей")
-            Set<Long> userList,
-            @RequestParam(name = "langs", required = false)
-            @Parameter(description = "Список языков программирования")
-            Set<String> langList
+            @RequestBody ReportGetRequest request
     ) {
-        // TODO
-        return null;
+        return distributorService
+                .getGeneralReport(
+                        similarityThresholdStart,
+                        similarityThresholdEnd,
+                        request.tasks(),
+                        request.users(),
+                        request.langs())
+                .thenApplyAsync(mdReportGeneratorService::convertToMarkdown, reportExecutor);
     }
 
-    @GetMapping("/json/")
+    @GetMapping("/json")
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решениям")
-    @Async
     public CompletableFuture<ReportDto> getJsonReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
             @Parameter(description = "Нижний порог сходства решений")
@@ -59,79 +63,44 @@ public class ReportController {
             @RequestParam(name = "similarity_threshold_end", defaultValue = "100")
             @Parameter(description = "Верхний порог сходства решений")
             float similarityThresholdEnd,
-            @RequestParam(name = "tasks", required = false)
-            @Parameter(description = "Список идентификаторов задач")
-            Set<Long> tasks,
-            @RequestParam(name = "users", required = false)
-            @Parameter(description = "Список идентификаторов пользователей")
-            Set<Long> users,
-            @RequestParam(name = "langs", required = false)
-            @Parameter(description = "Список языков программирования")
-            Set<String> langs
+            @RequestBody ReportGetRequest request
     ) {
 
         return distributorService
-                .getGeneralReport(similarityThresholdStart,
+                .getGeneralReport(
+                        similarityThresholdStart,
                         similarityThresholdEnd,
-                        tasks,
-                        users,
-                        langs);
+                        request.tasks(),
+                        request.users(),
+                        request.langs());
     }
 
-    @GetMapping("/private/md/")
+    @PostMapping(path = "/private/md", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решению в формате MD")
-    @Async
     public CompletableFuture<String> getPrivateMdReport(
-            @RequestParam(name = "task_id")
-            @Parameter(description = "ID задачи")
-            long taskId,
-            @RequestParam(name = "solution_id")
-            @Parameter(description = "ID решения")
-            long solutionId,
-            @RequestParam(name = "user_id")
-            @Parameter(description = "ID пользователя")
-            long userId,
-            @RequestParam(name = "lang")
-            @Parameter(description = "Список языков")
-            String lang,
-            @RequestParam(name = "code")
-            @Parameter(description = "Список языков программирования")
-            String code
+            @RequestParam("task_id") @Parameter(description = "ID задачи") long taskId,
+            @RequestParam("solution_id") @Parameter(description = "ID решения") long solutionId,
+            @RequestParam("user_id") @Parameter(description = "ID пользователя") long userId,
+            @RequestParam("file") @Parameter(description = "Исходный код") MultipartFile file
     ) {
-        // TODO
-        return null;
+        return distributorService
+                .getPrivateReport(taskId, solutionId, userId, file)
+                .thenApplyAsync(mdReportGeneratorService::convertToMarkdownPrivate, reportExecutor);
     }
 
-    @GetMapping("/private/json/")
+    @PostMapping(path = "/private/json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
             summary = "Получить отчет",
             description = "Предоставляет отчёт по решению в формате JSON")
-    @Async
     public CompletableFuture<ReportDto> getPrivateJsonReport(
-            @RequestParam(name = "task_id")
-            @Parameter(description = "ID задачи")
-            long taskId,
-            @RequestParam(name = "solution_id")
-            @Parameter(description = "ID решения")
-            long solutionId,
-            @RequestParam(name = "user_id")
-            @Parameter(description = "ID пользователя")
-            long userId,
-            @RequestParam(name = "lang")
-            @Parameter(description = "Список языков")
-            String lang,
-            @RequestParam(name = "code")
-            @Parameter(description = "Список языков программирования")
-            String code
+            @RequestParam("task_id") @Parameter(description = "ID задачи") long taskId,
+            @RequestParam("solution_id") @Parameter(description = "ID решения") long solutionId,
+            @RequestParam("user_id") @Parameter(description = "ID пользователя") long userId,
+            @RequestParam("file") @Parameter(description = "Исходный код") MultipartFile file
     ) {
 
-        return distributorService
-                .getPrivateReport(taskId,
-                        solutionId,
-                        userId,
-                        lang,
-                        code);
+        return distributorService.getPrivateReport(taskId, solutionId, userId, file);
     }
 }

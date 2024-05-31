@@ -1,19 +1,15 @@
 package com.vk.codeanalysis.public_interface.tokenizer;
 
-import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Поддерживаемые языки программирования
  */
-@Getter
+@RequiredArgsConstructor
 public enum Language {
     JAVA("java"),
     CPP("cpp"),
-    PYTHON("python");
+    PY("py");
 
     private final String name;
-
-    Language(String name) {
-        this.name = name;
-    }
 }

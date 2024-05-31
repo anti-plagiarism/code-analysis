@@ -48,7 +48,7 @@ public class PlagiarismDetector {
                 continue;
             }
 
-            Set<Long> files = (fingerprintBase.containsKey(fingerprint))
+            Set<Long> files = fingerprintBase.containsKey(fingerprint)
                     ? fingerprintBase.get(fingerprint)
                     : new HashSet<>();
 
