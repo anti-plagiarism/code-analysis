@@ -1,5 +1,6 @@
 package com.vk.codeanalysis.config;
 
+import com.vk.codeanalysis.public_interface.exception.EmptyFileException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleIllegalArgumentExceptions(Exception ex)
     {
         log.error("Error during file processing: ", ex);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                ErrorResponse.builder(ex, BAD_REQUEST, ex.getMessage()).build()
+        );
+    }
+
+    @ExceptionHandler(EmptyFileException.class)
+    public ResponseEntity<ErrorResponse> handleEmptyFileExceptions(Exception ex)
+    {
+        log.error("Error during program processing: ", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 ErrorResponse.builder(ex, BAD_REQUEST, ex.getMessage()).build()
         );

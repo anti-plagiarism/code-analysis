@@ -1,6 +1,6 @@
 package com.vk.codeanalysis.rest.solution;
 
-import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
+import com.vk.codeanalysis.public_interface.distributor.DistributorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import static com.vk.codeanalysis.Utils.FileUtils.getLanguageFromExtension;
-import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
+import static com.vk.codeanalysis.public_interface.utils.FileUtils.getLanguageFromExtension;
+import static com.vk.codeanalysis.public_interface.utils.FileUtils.getProgram;
 
 @RestController
 @RequestMapping("/v0/solutions")
@@ -26,7 +26,7 @@ import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
                 "или загружать авторские решения, чтобы избeгать неоправданной блокировки"
 )
 public class SolutionController {
-    private final DistributorServiceV0 distributorService;
+    private final DistributorService distributorService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
@@ -43,6 +43,7 @@ public class SolutionController {
             @Parameter(description = "Идентификатор пользователя из системы", example = "1")
             Long userId,
             @RequestParam("file")
+            @Parameter(description = "Файл с пользовательским решением")
             MultipartFile file
     ) {
         distributorService.put(
@@ -63,6 +64,7 @@ public class SolutionController {
             @Parameter(description = "Идентификатор задания", example = "1")
             Long taskId,
             @RequestParam("file")
+            @Parameter(description = "Файл с пользовательским решением")
             MultipartFile file
     ) {
         distributorService.addIgnored(taskId, file);

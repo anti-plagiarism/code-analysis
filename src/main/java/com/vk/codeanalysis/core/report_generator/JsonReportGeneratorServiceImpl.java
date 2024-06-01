@@ -1,12 +1,13 @@
 package com.vk.codeanalysis.core.report_generator;
 
-import com.vk.codeanalysis.dto.report.DependentTaskDto;
+import com.vk.codeanalysis.public_interface.dto.report.DependentTaskDto;
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
+import com.vk.codeanalysis.public_interface.task_collector.TaskCollectorFactoryService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
-import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
-import com.vk.codeanalysis.dto.report.SimilarityIntervalDto;
-import com.vk.codeanalysis.dto.report.ReportDto;
-import com.vk.codeanalysis.dto.report.BaseTaskDto;
+import com.vk.codeanalysis.public_interface.tokenizer.TaskCollector;
+import com.vk.codeanalysis.public_interface.dto.report.SimilarityIntervalDto;
+import com.vk.codeanalysis.public_interface.dto.report.ReportDto;
+import com.vk.codeanalysis.public_interface.dto.report.BaseTaskDto;
 import com.vk.codeanalysis.tokenizer.CollisionReport;
 import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +25,7 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
-
-    private final Map<Language, TaskCollectorV0> collectors;
+    private final TaskCollectorFactoryService taskCollectorFactory;
 
     @Override
     public ReportDto generateGeneralReport(
@@ -36,7 +36,7 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
             Set<Language> langs
     ) {
         Map<Language, List<BaseTaskDto>> bodyMap = new HashMap<>();
-        for (var collectorEntry : collectors.entrySet()) {
+        for (var collectorEntry : taskCollectorFactory.getTaskCollectors().entrySet()) {
             Language language = collectorEntry.getKey();
 
             if (langs != null && !langs.isEmpty() && !langs.contains(language)) {
@@ -116,17 +116,12 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                 .build();
     }
 
-    private static boolean checkThresholdInterval(float value, float start, float end) {
-        return value >= start && value <= end;
-    }
-
     @Override
     public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, Language lang) {
-
         Map<Language, List<BaseTaskDto>> bodyMap = new HashMap<>();
         List<DependentTaskDto> dependentTasks = new ArrayList<>();
 
-        TaskCollectorV0 collector = collectors.get(lang);
+        TaskCollector collector = taskCollectorFactory.getCollector(lang);
         PlagiarismDetector detector = collector.getDetectors().get(taskId);
 
         Map<Long, List<Long>> submittedSolutions = detector.getSubmittedSolutions();
@@ -135,7 +130,7 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
         CollisionReport report = detector.getReports().get(solutionId);
         int totalFingerprints = report.getTotalFingerprints();
 
-        for (Map.Entry<Long, Integer> collisionEntry : report.getCollisions().entrySet()) {
+        for (var collisionEntry : report.getCollisions().entrySet()) {
             long currSolutionId = collisionEntry.getKey();
             long userCurrId = solutionToUser.get(currSolutionId);
 
@@ -171,5 +166,9 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                 .languages(Collections.singleton(lang))
                 .body(bodyMap)
                 .build();
+    }
+
+    private static boolean checkThresholdInterval(float value, float start, float end) {
+        return value >= start && value <= end;
     }
 }

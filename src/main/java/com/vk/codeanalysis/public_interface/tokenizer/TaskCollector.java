@@ -4,7 +4,7 @@ import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
 
 import java.util.Map;
 
-public interface TaskCollectorV0 {
+public interface TaskCollector {
     void add(long taskId, long solutionId, long userId, String program);
 
     void addIgnored(long taskId, String program);

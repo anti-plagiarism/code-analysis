@@ -1,10 +1,10 @@
 package com.vk.codeanalysis.core.report_generator;
 
-import com.vk.codeanalysis.core.file_tracker.FileTrackerService;
-import com.vk.codeanalysis.dto.report.BaseTaskDto;
-import com.vk.codeanalysis.dto.report.DependentTaskDto;
-import com.vk.codeanalysis.dto.report.ReportDto;
-import com.vk.codeanalysis.dto.report.SimilarityIntervalDto;
+import com.vk.codeanalysis.public_interface.dto.report.BaseTaskDto;
+import com.vk.codeanalysis.public_interface.dto.report.DependentTaskDto;
+import com.vk.codeanalysis.public_interface.dto.report.ReportDto;
+import com.vk.codeanalysis.public_interface.dto.report.SimilarityIntervalDto;
+import com.vk.codeanalysis.public_interface.file_tracker.FileTrackerService;
 import com.vk.codeanalysis.public_interface.report_generator.MdReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,6 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
-
     private final FileTrackerService fileTrackerService;
 
     @Override
@@ -38,7 +37,7 @@ public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
         return mdBuilder.toString();
     }
 
-    // В отчет добавляется информация о решении, а также схожие решения, включая их исходный код
+    @Override
     public String convertToMarkdownPrivate(ReportDto report) {
         StringBuilder mdBuilder = new StringBuilder();
         appendHeader(mdBuilder, "Проверка отдельного решения");
@@ -127,9 +126,12 @@ public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
     }
 
     private String fetchDependentSourceCode(BaseTaskDto task, DependentTaskDto dependent, Language language) {
-        return fileTrackerService
-                .fetchSolutionContent(task.taskId(), dependent.userId(), dependent.solutionId(), language)
-                .orElse("Исходный код не представлен");
+        return fileTrackerService.fetchSolutionContent(
+                        task.taskId(),
+                        dependent.userId(),
+                        dependent.solutionId(),
+                        language
+                ).orElse("Исходный код не представлен");
     }
 }
 

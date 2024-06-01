@@ -1,35 +1,35 @@
 package com.vk.codeanalysis.core.distributor;
 
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
+import com.vk.codeanalysis.public_interface.task_collector.TaskCollectorFactoryService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
-import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
-import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.public_interface.tokenizer.TaskCollector;
+import com.vk.codeanalysis.public_interface.distributor.DistributorService;
+import com.vk.codeanalysis.public_interface.dto.report.ReportDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
-import static com.vk.codeanalysis.Utils.FileUtils.getLanguageFromExtension;
-import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
+import static com.vk.codeanalysis.public_interface.utils.FileUtils.getLanguageFromExtension;
+import static com.vk.codeanalysis.public_interface.utils.FileUtils.getProgram;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DistributorServiceImpl implements DistributorServiceV0 {
+public class DistributorServiceImpl implements DistributorService {
     private final ExecutorService submitExecutor;
     private final ExecutorService reportExecutor;
-    private final Map<Language, TaskCollectorV0> collectors;
+    private final TaskCollectorFactoryService taskCollectorFactory;
     private final ReportGeneratorService reportGenerator;
 
     @Override
-    public void put(Long taskId, Long solutionId, Long userId, Language language, String file) {
-        TaskCollectorV0 collector = getCollector(language);
+    public void put(long taskId, long solutionId, long userId, Language language, String file) {
+        TaskCollector collector = taskCollectorFactory.getCollector(language);
         collector.add(taskId, solutionId, userId, file);
     }
 
@@ -56,7 +56,7 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
                                                          long userId,
                                                          MultipartFile file) {
         Language language = getLanguageFromExtension(file);
-        TaskCollectorV0 collector = getCollector(language);
+        TaskCollector collector = taskCollectorFactory.getCollector(language);
 
         return CompletableFuture.runAsync(
                 () -> collector.add(taskId, solutionId, userId, getProgram(file)),
@@ -68,20 +68,11 @@ public class DistributorServiceImpl implements DistributorServiceV0 {
     }
 
     @Override
-    public void addIgnored(Long taskId, MultipartFile file) {
+    public void addIgnored(long taskId, MultipartFile file) {
         Language language = getLanguageFromExtension(file);
-        TaskCollectorV0 collector = getCollector(language);
+        TaskCollector collector = taskCollectorFactory.getCollector(language);
 
         collector.addIgnored(taskId, getProgram(file));
-    }
-
-    private TaskCollectorV0 getCollector(Language lang) {
-        TaskCollectorV0 collector = collectors.get(lang);
-
-        if (collector == null) {
-            throw new IllegalArgumentException("Unsupported language");
-        }
-        return collector;
     }
 
     private boolean isThresholdIncorrect(float threshold) {

@@ -1,6 +1,6 @@
 package com.vk.codeanalysis.tokenizer;
 
-import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
+import com.vk.codeanalysis.public_interface.tokenizer.TaskCollector;
 import lombok.Getter;
 import org.treesitter.TSLanguage;
 
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-public class TaskCollectorImpl implements TaskCollectorV0 {
+public class TaskCollectorImpl implements TaskCollector {
     private final TSLanguage language;
     private final Map<Long, PlagiarismDetector> detectors = new HashMap<>();
 
