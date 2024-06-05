@@ -1,6 +1,5 @@
 package com.vk.codeanalysis.tokenizer;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.treesitter.TSInputEncoding;
 import org.treesitter.TSLanguage;
 import org.treesitter.TSNode;
@@ -16,16 +15,17 @@ import java.io.InputStreamReader;
 import java.util.Iterator;
 
 public class Fingerprinter {
+    private final static int DEFAULT_K = 20;
+    private final static int DEFAULT_WINDOW_LENGTH = 5;
+
     private final TSParser tsParser;
 
-    @Value("${fingerprinter.k}")
     private int k;
 
-    @Value("${fingerprinter.window-length}")
     private int windowLength;
 
     public Fingerprinter(TSParser tsParser) {
-        this.tsParser = tsParser;
+        this(tsParser, DEFAULT_K, DEFAULT_WINDOW_LENGTH);
     }
 
     public Fingerprinter(TSParser tsParser, int k, int windowLength) {
@@ -61,7 +61,7 @@ public class Fingerprinter {
                             kGram.put(node.getSymbol());
                             return kGram.getHashCode();
                         }
-                ), 5
+                ), windowLength
         );
     }
 
@@ -70,7 +70,7 @@ public class Fingerprinter {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(System.in));
         File file = new File(reader.readLine());
-        TSParser tSparser = new TSParser();
+    TSParser tSparser = new TSParser();
         TSLanguage lang = new TreeSitterPython();
         tSparser.setLanguage(lang);
         Fingerprinter fingerprinter = new Fingerprinter(tSparser);

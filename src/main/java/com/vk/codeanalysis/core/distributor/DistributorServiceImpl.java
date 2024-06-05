@@ -1,82 +1,90 @@
 package com.vk.codeanalysis.core.distributor;
 
-import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV1;
-import com.vk.codeanalysis.tokenizer.CollisionReport;
+import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
-import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
+import com.vk.codeanalysis.public_interface.tokenizer.TaskCollectorV0;
 import com.vk.codeanalysis.public_interface.distributor.DistributorServiceV0;
-import com.vk.codeanalysis.public_interface.dto.SolutionPutRequest;
+import com.vk.codeanalysis.dto.report.ReportDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+
+import static com.vk.codeanalysis.Utils.FileUtils.getLanguageFromExtension;
+import static com.vk.codeanalysis.Utils.FileUtils.getProgram;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DistributorServiceImpl implements DistributorServiceV0 {
-    private final ExecutorService executor;
-    private final Map<Language, TaskCollectorV1> collectors;
+    private final ExecutorService submitExecutor;
+    private final ExecutorService reportExecutor;
+    private final Map<Language, TaskCollectorV0> collectors;
+    private final ReportGeneratorService reportGenerator;
 
     @Override
-    public void put(SolutionPutRequest request) {
-        TaskCollectorV1 collector = collectors.get(request.lang());
+    public void put(Long taskId, Long solutionId, Long userId, Language language, String file) {
+        TaskCollectorV0 collector = getCollector(language);
+        collector.add(taskId, solutionId, userId, file);
+    }
 
-        if (collector == null) {
-            throw new IllegalArgumentException("Unsupported language");
+    @Override
+    public CompletableFuture<ReportDto> getGeneralReport(float thresholdStart,
+                                                         float thresholdEnd,
+                                                         Set<Long> tasks,
+                                                         Set<Long> users,
+                                                         Set<Language> langs) {
+        if (isThresholdIncorrect(thresholdStart) || isThresholdIncorrect(thresholdEnd)
+                || thresholdStart > thresholdEnd) {
+            throw new IllegalArgumentException("Wrong similarity threshold value");
         }
 
-        executor.execute(() ->
-                collector.add(request.taskId(), request.solutionId(), request.program())
+        return CompletableFuture.supplyAsync(
+                () -> reportGenerator.generateGeneralReport(thresholdStart, thresholdEnd, tasks, users, langs),
+                reportExecutor
         );
     }
 
     @Override
-    public String get(float similarityThreshold) {
-        if (similarityThreshold < 0 || similarityThreshold > 100) {
-            throw new IllegalArgumentException("Wrong similarity threshold value");
+    public CompletableFuture<ReportDto> getPrivateReport(long taskId,
+                                                         long solutionId,
+                                                         long userId,
+                                                         MultipartFile file) {
+        Language language = getLanguageFromExtension(file);
+        TaskCollectorV0 collector = getCollector(language);
+
+        return CompletableFuture.runAsync(
+                () -> collector.add(taskId, solutionId, userId, getProgram(file)),
+                submitExecutor
+        ).thenApplyAsync(
+                voidResult -> reportGenerator.generatePrivateReport(taskId, solutionId, userId, language),
+                reportExecutor
+        );
+    }
+
+    @Override
+    public void addIgnored(Long taskId, MultipartFile file) {
+        Language language = getLanguageFromExtension(file);
+        TaskCollectorV0 collector = getCollector(language);
+
+        collector.addIgnored(taskId, getProgram(file));
+    }
+
+    private TaskCollectorV0 getCollector(Language lang) {
+        TaskCollectorV0 collector = collectors.get(lang);
+
+        if (collector == null) {
+            throw new IllegalArgumentException("Unsupported language");
         }
+        return collector;
+    }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("## Отчет о сравнении решений участников")
-                .append("\n\n## Порог совпадения = ")
-                .append(similarityThreshold)
-                .append("\n\n\n## Подробный отчет о совпадениях\n");
-
-        int similarityCounter = 1;
-        for (var collectorEntry : collectors.entrySet()) {
-            String language = collectorEntry.getKey().getName();
-            sb.append("\n### Язык ")
-                    .append(language)
-                    .append("\n");
-            for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
-
-                for (Map.Entry<Long, CollisionReport> reportsEntry : detectorsEntry.getValue().getReports().entrySet()) {
-
-                    int totalFingerprints = reportsEntry.getValue().getTotalFingerprints();
-                    for (Map.Entry<Long, Integer> collisionEntry : reportsEntry.getValue().getCollisions().entrySet()) {
-
-                        float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
-
-                        if (similarity >= similarityThreshold) {
-                            sb.append("#### Совпадение ")
-                                    .append(similarityCounter++)
-                                    .append("\n")
-                                    .append("id1=")
-                                    .append(reportsEntry.getKey())
-                                    .append(" и id2=")
-                                    .append(collisionEntry.getKey())
-                                    .append(" - процент совпадений = ")
-                                    .append(similarity)
-                                    .append("\n");
-                        }
-                    }
-                }
-            }
-        }
-
-        return sb.toString();
+    private boolean isThresholdIncorrect(float threshold) {
+        return threshold < 0 || threshold > 100;
     }
 }

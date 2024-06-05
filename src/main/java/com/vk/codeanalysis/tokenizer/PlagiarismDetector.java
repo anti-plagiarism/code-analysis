@@ -9,6 +9,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Getter
 public class PlagiarismDetector {
@@ -16,6 +23,11 @@ public class PlagiarismDetector {
     private final Map<Integer, Map<Long, Long>> fingerprintBase = new HashMap<>();
     private final Map<Long, CollisionReport> reports = new HashMap<>();
     private final Set<Integer> ignoredFingerprints = new HashSet<>();
+
+    // UserId <--> List<SolutionId>
+    private final Map<Long, List<Long>> submittedSolutions = new HashMap<>();
+    // SolutionId <--> UserId
+    private final Map<Long, Long> solutionToUser = new HashMap<>();
 
     public PlagiarismDetector(TSLanguage language) {
         TSParser tsParser = new TSParser();
@@ -29,7 +41,11 @@ public class PlagiarismDetector {
         this.fingerprinter = new Fingerprinter(tsParser, k, winnowLength);
     }
 
-    public void processFile(long solutionId, String file) {
+    public synchronized void processFile(long userId, long solutionId, String file) {
+        List<Long> solutionsList = submittedSolutions.computeIfAbsent(userId, it -> new ArrayList<>());
+        solutionsList.add(solutionId);
+        solutionToUser.put(solutionId, userId);
+
         Iterator<Integer> fingerprints = fingerprinter.getFingerprints(file);
         var collisionReport = new CollisionReport();
         Set<Integer> checkedFingerprints = new HashSet<>();

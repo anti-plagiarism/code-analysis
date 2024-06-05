@@ -7,14 +7,12 @@ import java.util.List;
 public class WinnowingIterator implements Iterator<Integer> {
     private final Iterator<Integer> iterator;
     private final int[] window;
-    private final int k;
     private boolean filled;
     private int counter;
     private int minValue;
 
     public WinnowingIterator(Iterator<Integer> iterator, int k) {
         this.iterator = iterator;
-        this.k = k;
         this.window = new int[k];
     }
 
@@ -61,9 +59,9 @@ public class WinnowingIterator implements Iterator<Integer> {
 
     public static void main(String[] args) {
         List<Integer> list = Arrays.asList(77, 74, 42, 17, 98, 50, 17, 98, 8, 88, 67, 39, 77, 74, 42, 17, 98);
-        Iterator<Integer> iterator = new WinnowingIterator(list.iterator(), 5);
+        Iterator<Integer> iterator = new WinnowingIterator(list.iterator(), 2);
         while (iterator.hasNext()) {
-            System.out.println(iterator.next());
+            System.out.print(" " + iterator.next());
         }
     }
 }
