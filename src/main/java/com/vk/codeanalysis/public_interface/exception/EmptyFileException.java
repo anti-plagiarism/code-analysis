@@ -1,10 +1,5 @@
-package com.vk.codeanalysis.config;
+package com.vk.codeanalysis.public_interface.exception;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class EmptyFileException extends RuntimeException {
 
     public EmptyFileException(String message) {

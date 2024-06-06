@@ -52,7 +52,7 @@ public class PlagiarismDetector {
                     ? fingerprintBase.get(fingerprint)
                     : new HashSet<>();
 
-            for (Long collisionSolutionId : files) {
+            for (long collisionSolutionId : files) {
                 if (collisionSolutionId != solutionId) {
                     collisionReport.addCollisionWith(collisionSolutionId);
                     reports.get(collisionSolutionId).addCollisionWith(solutionId);

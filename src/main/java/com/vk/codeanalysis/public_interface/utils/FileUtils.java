@@ -1,6 +1,6 @@
-package com.vk.codeanalysis.Utils;
+package com.vk.codeanalysis.public_interface.utils;
 
-import com.vk.codeanalysis.config.EmptyFileException;
+import com.vk.codeanalysis.public_interface.exception.EmptyFileException;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
@@ -47,7 +47,7 @@ public final class FileUtils {
         String extension = FilenameUtils.getExtension(file.getOriginalFilename());
 
         if (extension == null) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("File is not valid, change extension of this file");
         }
         return Language.valueOf(extension.toUpperCase());
     }

@@ -49,8 +49,8 @@ public class Fingerprinter {
                 if (line == null) {
                     break;
                 }
-                ans.append(line);
-                ans.append("\n");
+                ans.append(line)
+                        .append("\n");
             }
             return ans.toString();
         }
@@ -66,7 +66,7 @@ public class Fingerprinter {
                             kGram.put(node.getSymbol());
                             return kGram.getHashCode();
                         }
-                ),WINDOW_LENGTH
+                ), WINDOW_LENGTH
         );
     }
 
