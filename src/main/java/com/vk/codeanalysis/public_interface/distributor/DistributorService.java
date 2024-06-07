@@ -1,13 +1,13 @@
 package com.vk.codeanalysis.public_interface.distributor;
 
-import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.public_interface.dto.report.ReportDto;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-public interface DistributorServiceV0 {
+public interface DistributorService {
 
     /**
      * Метод для загрузки файлов пользователей в систему антиплагиата
@@ -19,9 +19,9 @@ public interface DistributorServiceV0 {
      * @param language   язык программирования
      * @param file       решение
      */
-    void put(Long taskId,
-             Long solutionId,
-             Long userId,
+    void put(long taskId,
+             long solutionId,
+             long userId,
              Language language,
              String file);
 
@@ -65,6 +65,6 @@ public interface DistributorServiceV0 {
      * @param taskId ID задачи
      * @param file   решение
      */
-    void addIgnored(Long taskId,
+    void addIgnored(long taskId,
                     MultipartFile file);
 }

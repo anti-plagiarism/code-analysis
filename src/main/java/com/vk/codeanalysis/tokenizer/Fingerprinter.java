@@ -67,12 +67,14 @@ public class Fingerprinter {
 
     public static void main(String[] args) throws IOException {
         System.out.println("Input file: ");
+      
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(System.in));
         File file = new File(reader.readLine());
-    TSParser tSparser = new TSParser();
+        TSParser tSparser = new TSParser();
         TSLanguage lang = new TreeSitterPython();
         tSparser.setLanguage(lang);
+      
         Fingerprinter fingerprinter = new Fingerprinter(tSparser);
         Iterator<Integer> fingerprints = fingerprinter.getFingerprintsFromFile(file);
         while (fingerprints.hasNext()) {

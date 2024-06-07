@@ -1,6 +1,6 @@
 package com.vk.codeanalysis.public_interface.report_generator;
 
-import com.vk.codeanalysis.dto.report.ReportDto;
+import com.vk.codeanalysis.public_interface.dto.report.ReportDto;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 
 import java.util.Set;
