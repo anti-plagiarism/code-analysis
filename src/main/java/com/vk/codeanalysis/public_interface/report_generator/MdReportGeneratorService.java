@@ -1,6 +1,7 @@
 package com.vk.codeanalysis.public_interface.report_generator;
 
 import com.vk.codeanalysis.public_interface.dto.report.ReportDto;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MdReportGeneratorService {
     /**
@@ -17,5 +18,5 @@ public interface MdReportGeneratorService {
      * @param report обработанное решение
      * @return md отчёт
      */
-    String convertToMarkdownPrivate(ReportDto report);
+    String convertToMarkdownPrivate(ReportDto report, MultipartFile file);
 }

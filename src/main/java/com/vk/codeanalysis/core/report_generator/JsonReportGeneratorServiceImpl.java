@@ -1,13 +1,14 @@
 package com.vk.codeanalysis.core.report_generator;
 
-import com.vk.codeanalysis.public_interface.dto.report.DependentTaskDto;
+import com.vk.codeanalysis.public_interface.dto.report.BaseSolutionDto;
+import com.vk.codeanalysis.public_interface.dto.report.DependentSolutionDto;
 import com.vk.codeanalysis.public_interface.report_generator.ReportGeneratorService;
 import com.vk.codeanalysis.public_interface.task_collector.TaskCollectorFactoryService;
 import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import com.vk.codeanalysis.public_interface.tokenizer.TaskCollector;
 import com.vk.codeanalysis.public_interface.dto.report.SimilarityIntervalDto;
 import com.vk.codeanalysis.public_interface.dto.report.ReportDto;
-import com.vk.codeanalysis.public_interface.dto.report.BaseTaskDto;
+import com.vk.codeanalysis.public_interface.dto.report.TaskDto;
 import com.vk.codeanalysis.tokenizer.CollisionReport;
 import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
             Set<Long> users,
             Set<Language> langs
     ) {
-        Map<Language, List<BaseTaskDto>> bodyMap = new HashMap<>();
+        Map<Language, List<TaskDto>> bodyMap = new HashMap<>();
         for (var collectorEntry : taskCollectorFactory.getTaskCollectors().entrySet()) {
             Language language = collectorEntry.getKey();
 
@@ -43,7 +44,7 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                 continue;
             }
 
-            List<BaseTaskDto> similarityList = new ArrayList<>();
+            List<TaskDto> baseTasks = new ArrayList<>();
             for (Map.Entry<Long, PlagiarismDetector> detectorsEntry : collectorEntry.getValue().getDetectors().entrySet()) {
                 Map<Long, List<Long>> submittedSolutions = detectorsEntry.getValue().getSubmittedSolutions();
                 Map<Long, Long> solutionToUser = detectorsEntry.getValue().getSolutionToUser();
@@ -53,6 +54,7 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                     continue;
                 }
 
+                List<BaseSolutionDto> baseSolutions = new ArrayList<>();
                 for (Map.Entry<Long, CollisionReport> reportsEntry : detectorsEntry.getValue().getReports().entrySet()) {
                     long baseSolutionId = reportsEntry.getKey();
                     long userBaseId = solutionToUser.get(baseSolutionId);
@@ -63,8 +65,7 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                         continue;
                     }
 
-                    List<DependentTaskDto> dependentDtoList = new ArrayList<>();
-
+                    List<DependentSolutionDto> dependentSolutions = new ArrayList<>();
                     int totalFingerprints = reportsEntry.getValue().getTotalFingerprints();
                     for (Map.Entry<Long, Integer> collisionEntry : reportsEntry.getValue().getCollisions().entrySet()) {
                         long currSolutionId = collisionEntry.getKey();
@@ -82,8 +83,8 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                         float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
                         boolean isInInterval = checkThresholdInterval(similarity, thresholdStart, thresholdEnd);
                         if (isInInterval) {
-                            dependentDtoList.add(
-                                    DependentTaskDto.builder()
+                            dependentSolutions.add(
+                                    DependentSolutionDto.builder()
                                             .userId(userCurrId)
                                             .solutionId(currSolutionId)
                                             .matchesPercentage(similarity)
@@ -91,20 +92,26 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                             );
                         }
                     }
-
-                    if (!dependentDtoList.isEmpty()) {
-                        similarityList.add(
-                                BaseTaskDto.builder()
-                                        .taskId(taskId)
+                    if (!dependentSolutions.isEmpty()) {
+                        baseSolutions.add(
+                                BaseSolutionDto.builder()
                                         .userId(userBaseId)
                                         .solutionId(baseSolutionId)
-                                        .dependentTasks(dependentDtoList)
+                                        .dependentSolutions(dependentSolutions)
                                         .build()
                         );
                     }
                 }
+                if (!baseSolutions.isEmpty()) {
+                    baseTasks.add(
+                            TaskDto.builder()
+                                    .taskId(taskId)
+                                    .baseSolutions(baseSolutions)
+                                    .build()
+                    );
+                }
             }
-            bodyMap.put(language, similarityList);
+            bodyMap.put(language, baseTasks);
         }
 
         return ReportDto.builder()
@@ -118,8 +125,8 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
 
     @Override
     public ReportDto generatePrivateReport(long taskId, long solutionId, long userId, Language lang) {
-        Map<Language, List<BaseTaskDto>> bodyMap = new HashMap<>();
-        List<DependentTaskDto> dependentTasks = new ArrayList<>();
+        Map<Language, List<TaskDto>> bodyMap = new HashMap<>();
+        List<DependentSolutionDto> dependentSolutions = new ArrayList<>();
 
         TaskCollector collector = taskCollectorFactory.getCollector(lang);
         PlagiarismDetector detector = collector.getDetectors().get(taskId);
@@ -141,8 +148,8 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
 
             float similarity = 100 * (collisionEntry.getValue() * 1F) / totalFingerprints;
 
-            dependentTasks.add(
-                    DependentTaskDto.builder()
+            dependentSolutions.add(
+                    DependentSolutionDto.builder()
                             .userId(userCurrId)
                             .solutionId(currSolutionId)
                             .matchesPercentage(similarity)
@@ -150,15 +157,26 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
             );
         }
 
-        bodyMap.put(
-                lang,
-                Collections.singletonList(
-                        BaseTaskDto.builder()
-                        .userId(userId)
-                        .solutionId(solutionId)
-                        .dependentTasks(dependentTasks).build()
-                )
-        );
+        if (!dependentSolutions.isEmpty()) {
+            bodyMap.put(
+                    lang,
+                    Collections.singletonList(
+                            TaskDto.builder()
+                                    .taskId(taskId)
+                                    .baseSolutions(
+                                            Collections.singletonList(
+                                                    BaseSolutionDto.builder()
+                                                            .userId(userId)
+                                                            .solutionId(solutionId)
+                                                            .dependentSolutions(dependentSolutions)
+                                                            .build()
+                                            )
+                                    )
+                                    .build()
+                    )
+            );
+        }
+
 
         return ReportDto.builder()
                 .tasks(Collections.singleton(taskId))

@@ -26,5 +26,5 @@ public class ReportDto {
     @Schema(description = "Значения для языков программирования")
     private Set<Language> languages;
     @Schema(description = "Мапа для хранения совпадений по пользовательским решениям, сгруппированным по языкам")
-    private Map<Language, List<BaseTaskDto>> body;
+    private Map<Language, List<TaskDto>> body;
 }

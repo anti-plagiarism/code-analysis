@@ -1,5 +1,6 @@
 package com.vk.codeanalysis.tokenizer;
 
+import com.vk.codeanalysis.public_interface.utils.FileUtils;
 import org.treesitter.TSInputEncoding;
 import org.treesitter.TSLanguage;
 import org.treesitter.TSNode;
@@ -9,7 +10,6 @@ import org.treesitter.TreeSitterPython;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Iterator;
@@ -20,9 +20,9 @@ public class Fingerprinter {
 
     private final TSParser tsParser;
 
-    private int k;
+    private final int k;
 
-    private int windowLength;
+    private final int windowLength;
 
     public Fingerprinter(TSParser tsParser) {
         this(tsParser, DEFAULT_K, DEFAULT_WINDOW_LENGTH);
@@ -52,7 +52,7 @@ public class Fingerprinter {
     }
 
     public Iterator<Integer> getFingerprintsFromFile(File file) throws IOException {
-        TSTree tree = tsParser.parseStringEncoding(null, Utils.readFile(file), TSInputEncoding.TSInputEncodingUTF8);
+        TSTree tree = tsParser.parseStringEncoding(null, FileUtils.readFile(file), TSInputEncoding.TSInputEncodingUTF8);
         KGram kGram = new KGram(k);
         return new WinnowingIterator(
                 new MapIterator<>(

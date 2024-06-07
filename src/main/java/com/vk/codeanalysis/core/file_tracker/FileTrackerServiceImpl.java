@@ -30,8 +30,7 @@ import static com.vk.codeanalysis.public_interface.utils.FileUtils.readProgramFr
 @Service
 @RequiredArgsConstructor
 public class FileTrackerServiceImpl implements FileTrackerService {
-    private static final Pattern SOLUTION_PATH_PATTERN = Pattern.compile(
-            "/(\\d+)_task/(\\d+)_user/(\\d+)_[-.\\w_()=\\s',]+\\.(\\w+)");
+
     private static final int TASK_GROUP = 1;
     private static final int USER_GROUP = 2;
     private static final int SOLUTION_GROUP = 3;
@@ -50,14 +49,20 @@ public class FileTrackerServiceImpl implements FileTrackerService {
 
     @PostConstruct
     private void trackSolutions() {
+        Pattern solutionPathPattern = Pattern.compile(
+                "/(\\d+)" + taskSuffix +
+                        "/(\\d+)" + userSuffix +
+                        "/(\\d+)" + solutionSuffix + "\\.(\\w+)");
+
         Path rootPath = Path.of(trackPath);
+
         try {
             Map<Long, SolutionDto> latestSolutions = new HashMap<>();
             Files.walkFileTree(rootPath, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                     try {
-                        Optional<SolutionDto> solutionPutRequestOptional = parseSolutionPath(file, rootPath);
+                        Optional<SolutionDto> solutionPutRequestOptional = parseSolutionPath(file, rootPath, solutionPathPattern);
                         if (solutionPutRequestOptional.isEmpty()) {
                             return FileVisitResult.CONTINUE;
                         }
@@ -78,6 +83,20 @@ public class FileTrackerServiceImpl implements FileTrackerService {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private Optional<SolutionDto> parseSolutionPath(Path solutionPath, Path rootPath, Pattern solutionPathPattern) {
+        String normalizedPath = normalizePath(solutionPath);
+        String regexToExclude = "^.+/" + rootPath.getFileName();
+        String relativePath = normalizedPath.replaceFirst(regexToExclude, "");
+
+        Matcher matcher = solutionPathPattern.matcher(relativePath);
+        if (!matcher.matches()) {
+            log.error("Path does not match: {}", relativePath);
+            return Optional.empty();
+        }
+
+        return getSolutionEntity(matcher, solutionPath);
     }
 
     @Override
@@ -104,22 +123,7 @@ public class FileTrackerServiceImpl implements FileTrackerService {
                                         solution.solutionId(),
                                         solution.userId(),
                                         solution.language(),
-                                        solution.file())
-                );
-    }
-
-    private Optional<SolutionDto> parseSolutionPath(Path solutionPath, Path rootPath) {
-        String normalizedPath = normalizePath(solutionPath);
-        String regexToExclude = "^.+/" + rootPath.getFileName();
-        String relativePath = normalizedPath.replaceFirst(regexToExclude, "");
-
-        Matcher matcher = SOLUTION_PATH_PATTERN.matcher(relativePath);
-        if (!matcher.matches()) {
-            log.error("Path does not match: {}", relativePath);
-            return Optional.empty();
-        }
-
-        return getSolutionEntity(matcher, solutionPath);
+                                        solution.file()));
     }
 
     private Optional<SolutionDto> getSolutionEntity(Matcher matcher, Path solutionPath) {
