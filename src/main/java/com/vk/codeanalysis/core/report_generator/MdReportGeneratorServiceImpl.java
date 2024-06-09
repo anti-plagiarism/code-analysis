@@ -127,9 +127,7 @@ public class MdReportGeneratorServiceImpl implements MdReportGeneratorService {
     private void appendSourceCode(StringBuilder mdBuilder, String sourceCode) {
         mdBuilder.append("<details>\n")
                 .append("    <summary style=\"margin-left: 20px;\">Исходный код</summary>\n")
-                .append("<pre>\n\n")
-                .append(sourceCode)
-                .append("\n</pre>\n")
+                .append("    \n```\n").append(sourceCode).append("\n```\n")
                 .append("</details>\n\n")
                 .append("---\n\n");
     }
