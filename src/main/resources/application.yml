@@ -1,2 +1,32 @@
 server:
   port: 8085
+
+file-tracker:
+  path: ${FILE_TRACKER_PATH}
+  task-dir-suffix: _task
+  user-dir-suffix: _user
+  solution-dir-suffix: _solution
+
+executor:
+  keep-alive-in-seconds: 3
+
+  queue:
+    max-capacity: 1000
+
+  processors:
+    cpu-threads-count: ${CPU_THREADS_COUNT}
+
+spring:
+  mvc:
+    static-path-pattern: /swagger*'
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+springdoc:
+  api-docs:
+    path: /api-docs
+
+

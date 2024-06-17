@@ -1,0 +1,17 @@
+version: '3.8'
+
+networks:
+  vk:
+    driver: bridge
+
+services:
+  demo-server:
+    image: code-analysis:1.0
+    container_name: vk-code-analysis
+    ports:
+      - "8085:8085"
+    environment:
+      - CPU_THREADS_COUNT=4
+      - FILE_TRACKER_PATH=/home/user/anticheat_sample_solutions
+    networks:
+      - vk
