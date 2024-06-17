@@ -32,7 +32,7 @@ public class ReportController {
     @GetMapping(value = "/md", produces = MediaType.TEXT_MARKDOWN_VALUE)
     @Operation(
             summary = "Получить отчет",
-            description = "Предоставляет отчёт по решениям")
+            description = "Предоставляет отчёт по решениям в формате MD")
     public CompletableFuture<String> getMdReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
             @Parameter(description = "Нижний порог сходства")
@@ -55,7 +55,7 @@ public class ReportController {
     @GetMapping("/json")
     @Operation(
             summary = "Получить отчет",
-            description = "Предоставляет отчёт по решениям")
+            description = "Предоставляет отчёт по решениям в формате JSON")
     public CompletableFuture<ReportDto> getJsonReport(
             @RequestParam(name = "similarity_threshold_start", defaultValue = "0")
             @Parameter(description = "Нижний порог сходства решений")

@@ -111,7 +111,9 @@ public class JsonReportGeneratorServiceImpl implements ReportGeneratorService {
                     );
                 }
             }
-            bodyMap.put(language, baseTasks);
+            if (!baseTasks.isEmpty()) {
+                bodyMap.put(language, baseTasks);
+            }
         }
 
         return ReportDto.builder()

@@ -4,6 +4,7 @@ import com.vk.codeanalysis.public_interface.tokenizer.Language;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+@Schema(description = "Сущность предоставляемого решения")
 @Builder
 public record SolutionDto(
         @Schema(description = "Идентификатор задания", example = "1")
