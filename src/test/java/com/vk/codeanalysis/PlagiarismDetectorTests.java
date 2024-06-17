@@ -1,8 +1,8 @@
 package com.vk.codeanalysis;
 
+import com.vk.codeanalysis.public_interface.utils.FileUtils;
 import com.vk.codeanalysis.tokenizer.PlagiarismDetector;
 import com.vk.codeanalysis.tokenizer.Tuple;
-import com.vk.codeanalysis.tokenizer.Utils;
 import org.junit.jupiter.api.Test;
 import org.treesitter.TSLanguage;
 import org.treesitter.TreeSitterCpp;
@@ -79,8 +79,8 @@ public class PlagiarismDetectorTests {
 
     private Tuple<Double, Double> processFiles(PlagiarismDetector plagiarismDetector, File file1, File file2) {
         try {
-            plagiarismDetector.processFile(1, 1, Utils.readFile(file1));
-            plagiarismDetector.processFile(2, 2, Utils.readFile(file2));
+            plagiarismDetector.processFile(1, 1, FileUtils.readFile(file1));
+            plagiarismDetector.processFile(2, 2, FileUtils.readFile(file2));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

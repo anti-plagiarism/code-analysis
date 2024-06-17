@@ -65,7 +65,6 @@ public class ReportController {
             float similarityThresholdEnd,
             @RequestBody ReportGetRequest request
     ) {
-
         return distributorService
                 .getGeneralReport(
                         similarityThresholdStart,
@@ -95,7 +94,10 @@ public class ReportController {
     ) {
         return distributorService
                 .getPrivateReport(taskId, solutionId, userId, file)
-                .thenApplyAsync(mdReportGeneratorService::convertToMarkdownPrivate, reportExecutor);
+                .thenApplyAsync(
+                        reportDto -> mdReportGeneratorService.convertToMarkdownPrivate(reportDto, file),
+                        reportExecutor
+                );
     }
 
     @PostMapping(path = "/private/json", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -116,7 +118,6 @@ public class ReportController {
             @Parameter(description = "Файл с пользовательским решением")
             MultipartFile file
     ) {
-
         return distributorService.getPrivateReport(taskId, solutionId, userId, file);
     }
 }
