@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
-@Schema(description = "Сущность задачи, которая сравнивается на схожесть")
+@Schema(description = "Сущность решения, которая сравнивается на схожесть")
 @Builder
 public record DependentSolutionDto(
         @Schema(description = "Идентификатор пользователя")
